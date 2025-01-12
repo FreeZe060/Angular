@@ -12,11 +12,11 @@ import { ProductService } from '../product-service.service';
 		<h3>{{product.createdDate | date:'fullDate':'':'fr'}}</h3>
 		@if (product.isFavorite) {
 			<span><b>Product is a favorite</b>
-				<button (click)="switchFav()">Unfavorite</button>
+				<button (click)="switchFav()"><i class="fa-solid fa-heart"></i></button>
 			</span>
 		} @else {
 			<span>Simple Product
-				<button (click)="switchFav()">Make Favorite</button>
+				<button (click)="switchFav()"><i class="fa-regular fa-heart"></i></button>
 			</span>
 		}
 	</div> -->
@@ -34,14 +34,15 @@ import { ProductService } from '../product-service.service';
 
                 <div class="flex justify-between">
                     <div class="my-2">
-						<p class="font-semibold text-base mb-2">Favoris</p>
 						@if (product.isFavorite) {
-							<span><b>Product is a favorite</b>
-								<button (click)="switchFav()">Unfavorite</button>
+							<span class="flex">
+								<button (click)="switchFav()"><i class="fa-solid fa-heart mr-3"></i></button>
+								<p><b>Favorite!</b></p>
 							</span>
 						} @else {
-							<span>Simple Product
-								<button class="bg-grey" (click)="switchFav()">Make Favorite</button>
+							<span class="flex">
+								<button (click)="switchFav()"><i class="fa-regular fa-heart hover:fa-solid mr-3"></i></button>
+								<p>Simple Product</p>
 							</span>
 						}
                     </div>
