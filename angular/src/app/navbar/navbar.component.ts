@@ -8,7 +8,7 @@ import { ProductService } from '../product-service.service';
 		<div class="fixed p-4 w-full z-10">
 			<div class="p-5 text-gray-500 bg-gray-900 rounded-lg shadow-lg font-medium capitalize">
 				<span class="px-3 py-1 pr-4 border-r border-gray-800">
-					<img src="assets/images/SonoryLogo.png" alt="LogoSonory" class="w-8 h-8 -mt-1 inline mx-auto" />
+					<img src="../hogwarts-logo.png" alt="LogoHogwarts" class="w-8 h-8 -mt-1 inline mx-auto" />
 				</span>
 
 				<a routerLink="/" class="px-6 hover:text-gray-300 cursor-pointer transition-all duration-300"

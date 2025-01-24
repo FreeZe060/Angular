@@ -10,27 +10,42 @@ import { SearchByTermPipe } from "../search-by-term.pipe";
     selector: 'app-products-list',
     imports: [ProductCardComponent, SortByDate, FormsModule, SortByName, SearchByTermPipe],
     template: `
-        <h2 class="px-5">{{countFav}} Favorites</h2>
+        <div class="px-5 py-8 bg-gray-100 min-h-screen">
 
-        <div class="px-5 flex gap-20">
-            <div>
-                <input type="text" [(ngModel)]="searchTerm" placeholder="Chercher Produits...">
-                <button>Chercher</button>
+            <div class="px-5 flex gap-8 items-center bg-white shadow-md rounded-lg p-4">
+                <div class="flex items-center bg-gray-100 p-2 rounded-lg">
+                    <input
+                        type="text"
+                        [(ngModel)]="searchTerm"
+                        placeholder="Chercher des produits..."
+                        class="outline-none bg-transparent px-4 text-gray-700"
+                    />
+                    <button class="ml-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                        Chercher
+                    </button>
+                </div>
+
+                <div>
+                    <label class="text-gray-600 font-medium">Filtrer par</label>
+                    <select
+                        [(ngModel)]="sortSelected"
+                        class="ml-2 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-indigo-500">
+                        @for (so of sortOpt; track so) {
+                            <option [value]="$index">{{so}}</option>
+                        }
+                        </select>
+                </div>
+
+                <h2 class="text-xl font-semibold text-center text-gray-800">{{countFav}} Favoris</h2>
             </div>
-            <div>
-                <label>Filtrer par </label>
-                <select [(ngModel)]="sortSelected">
-                    @for (so of sortOpt; track so) {
-                        <option [value]="$index">{{so}}</option>
-                    }
-                </select>
+
+            <div class="flex justify-center items-center p-5 gap-5 flex-wrap">
+                @for (p of (products | searchByTerm: searchTerm | sortByDate: sortOpt[sortSelected] | sortByName: sortOpt[sortSelected]); track p.id) {
+                    <app-product-card [product]="p" (addItemEvent)="addItem($event)"></app-product-card>
+                }
             </div>
-	    </div>
-        <div class="flex center p-5 gap-5 flex-wrap">
-            @for (p of (products | searchByTerm: searchTerm | sortByDate: sortOpt[sortSelected] | sortByName: sortOpt[sortSelected]); track p.id) {
-                <app-product-card [product]=p (addItemEvent)="addItem($event)" />
-            }
-	    </div>
+        </div>
+
     `,
     styles: ``
 })
