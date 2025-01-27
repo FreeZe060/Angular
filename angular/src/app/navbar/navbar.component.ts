@@ -1,9 +1,11 @@
 import { Component, inject } from '@angular/core';
 import { ProductService } from '../product-service.service';
+import { Router, NavigationEnd, RouterLink } from '@angular/router';
 
 @Component({
 	selector: 'app-navbar',
 	standalone: true,
+	imports: [RouterLink],
 	template: `
 		<div class="fixed p-4 w-full z-10">
 			<div class="p-5 text-gray-500 bg-gray-900 rounded-lg shadow-lg font-medium capitalize">
@@ -11,14 +13,14 @@ import { ProductService } from '../product-service.service';
 					<img src="../hogwarts-logo.png" alt="LogoHogwarts" class="w-8 h-8 -mt-1 inline mx-auto" />
 				</span>
 
-				<a routerLink="/" class="px-6 hover:text-gray-300 cursor-pointer transition-all duration-300"
+				<a routerLink="" class="px-6 hover:text-gray-300 cursor-pointer transition-all duration-300"
 					[class.text-gray-300]="activeRoute === '/'">
 					<i class="fas fa-home p-2 bg-gray-800 rounded-full"></i>
 				</a>
 
-				<a routerLink="/songs"
+				<a routerLink="/products"
 					class="px-3 py-1 relative cursor-pointer hover:text-gray-300 text-base rounded mb-5 transition-all duration-300"
-					[class.text-gray-300]="activeRoute === '/songs'">
+					[class.text-gray-300]="activeRoute.startsWith('/product')">
 					<i class="w-8 fas fa-address-card p-2 bg-gray-800 rounded-full"></i>
 					<span class="mx-1">Produits</span>
 					<span class="absolute left-0 ml-8 -mt-2 text-xs bg-gray-700 font-medium px-2 shadow-lg rounded-full">
@@ -26,9 +28,9 @@ import { ProductService } from '../product-service.service';
 					</span>
 				</a>
 
-				<a routerLink="/artists"
+				<a routerLink="/favoris"
 					class="px-3 py-1 relative cursor-pointer hover:text-gray-300 text-base rounded mb-5 transition-all duration-300"
-					[class.text-gray-300]="activeRoute === '/artists'">
+					[class.text-gray-300]="activeRoute === '/favoris'">
 					<i class="w-8 fa-solid fa-heart p-2 bg-gray-800 rounded-full"></i>
 					<span class="mx-1">Favoris</span>
 					<span class="absolute left-0 ml-8 -mt-2 text-xs bg-gray-700 font-medium px-2 shadow-lg rounded-full">
@@ -66,4 +68,13 @@ export class NavbarComponent {
 	productService = inject(ProductService);
 	productCount: number = this.productService.getNumberOfProducts();
 	favoritesCount: number = this.productService.getNumberOfFavorites();
+	private router = inject(Router);
+
+	constructor() {
+		this.router.events.subscribe((event) => {
+			if (event instanceof NavigationEnd) {
+				this.activeRoute = event.urlAfterRedirects;
+			}
+		});
+	}
 }

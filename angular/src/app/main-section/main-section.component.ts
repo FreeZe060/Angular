@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
+import { ProductsListComponent } from '../products-list/products-list.component';
 
 @Component({
 	selector: 'app-main-section',
-	imports: [],
+	imports: [ProductsListComponent],
 	template: `
     <div class="bg-black bottom-0">
 		<div class="bg-white dark:bg-gray-800 ">
@@ -28,6 +29,9 @@ import { Component } from '@angular/core';
 			</div>
 		</div>
 	</div>
+
+	<app-products-list></app-products-list>
+
   	`,
 	styles: ``
 })

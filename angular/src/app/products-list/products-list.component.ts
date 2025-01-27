@@ -12,7 +12,7 @@ import { SearchByTermPipe } from "../search-by-term.pipe";
     template: `
         <div class="px-5 py-8 bg-gray-100 min-h-screen">
 
-            <div class="px-5 flex gap-8 items-center bg-white shadow-md rounded-lg p-4">
+            <div class="px-5 flex gap-16 items-center justify-center bg-white shadow-xl rounded-lg p-4">
                 <div class="flex items-center bg-gray-100 p-2 rounded-lg">
                     <input
                         type="text"
@@ -24,6 +24,8 @@ import { SearchByTermPipe } from "../search-by-term.pipe";
                         Chercher
                     </button>
                 </div>
+                
+                <h2 class="text-xl font-semibold text-center text-gray-800">{{countFav}} Favoris</h2>
 
                 <div>
                     <label class="text-gray-600 font-medium">Filtrer par</label>
@@ -35,8 +37,6 @@ import { SearchByTermPipe } from "../search-by-term.pipe";
                         }
                         </select>
                 </div>
-
-                <h2 class="text-xl font-semibold text-center text-gray-800">{{countFav}} Favoris</h2>
             </div>
 
             <div class="flex justify-center items-center p-5 gap-5 flex-wrap">
@@ -61,4 +61,5 @@ export class ProductsListComponent {
     addItem(item: number) {
         this.countFav += item;
     }
+
 }
