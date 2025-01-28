@@ -18,7 +18,7 @@ export class ProductService {
         { id: 8, name: 'Luna Lovegood', isFavorite: false, createdDate: new Date(1981, 2, 13), rarity: Rarity.Uncommon, price: 24.99, img: '/media/luna.jpg' },
         { id: 9, name: 'Ginny Weasley', isFavorite: false, createdDate: new Date(1981, 7, 11), rarity: Rarity.Common, price: 29.99, img: '/media/ginny.jpg' },
         { id: 10, name: 'Fred Weasley', isFavorite: false, createdDate: new Date(1978, 3, 1), rarity: Rarity.Rare, price: 39.99, img: '/media/fred.jpg' },
-        { id: 11, name: 'George Weasley', isFavorite: false, createdDate: new Date(1978, 3, 1), rarity: Rarity.Common, price: 29.99, img: '/media/george.jpg' },
+        { id: 11, name: 'George Weasley', isFavorite: false, createdDate: new Date(1978, 3, 1), rarity: Rarity.Uncommon, price: 29.99, img: '/media/george.jpg' },
         { id: 12, name: 'Minerva McGonagall', isFavorite: false, createdDate: new Date(1935, 9, 4), rarity: Rarity.Rare, price: 39.99, img: '/media/minerva.jpg' },
         { id: 13, name: 'Hagrid', isFavorite: false, createdDate: new Date(1928, 11, 6), rarity: Rarity.Epic, price: 59.99, img: '/media/hagrid.jpg' },
         { id: 14, name: 'Sirius Black', isFavorite: false, createdDate: new Date(1960, 10, 11), rarity: Rarity.Common, price: 19.99, img: '/media/sirius.jpg' },

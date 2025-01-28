@@ -52,7 +52,7 @@ import { SortByRarity } from "../sort-by-rarity.pipe";
 })
 
 export class ProductsListComponent {
-    sortOpt = ['A-Z', 'Z-A', '+ recent', '- recent','Common-Legendary', 'Legendary-Common'];
+    sortOpt = ['A-Z', 'Z-A', '+ Récent', '- Récent','↑ Rareté', '↓ Rareté'];
     sortSelected = 0;
     countFav = 0;
     searchTerm = '';
