@@ -36,7 +36,7 @@ import { SortByRarity } from "../sort-by-rarity.pipe";
                         class="ml-2 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-indigo-500">
                         @for (so of sortOpt; track so) {
                             <option [value]="$index">{{so}}</option>
-                        }
+                        }   
                         </select>
                 </div>
             </div>
@@ -59,15 +59,19 @@ export class ProductsListComponent {
     showFavorites = false;
     productService = inject(ProductService);
     products = this.productService.getProducts();
-    countFav: number = this.productService.getNumberOfFavorites();
+    countFav: number = 0;
 
     addItem(item: number) {
-        this.countFav += item;
+        // this.countFav += item;
     }
 
     private activatedRoute = inject(ActivatedRoute);
     
     ngOnInit() {
+        this.productService.favoritesCount$.subscribe(count => {
+            this.countFav = count;
+        });
+
         this.activatedRoute.url.subscribe((urlSegments) => {
             this.showFavorites = urlSegments.some(segment => segment.path === 'favoris');
         });

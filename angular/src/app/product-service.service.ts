@@ -28,6 +28,9 @@ export class ProductService {
     private productsSubject = new BehaviorSubject<Product[]>(this.products);
     products$ = this.productsSubject.asObservable();
 
+    private favoritesCountSubject = new BehaviorSubject<number>(0);
+    favoritesCount$ = this.favoritesCountSubject.asObservable();
+
     private cart: { product: Product, quantity: number }[] = [];
     private cartSubject = new BehaviorSubject<{ product: Product, quantity: number }[]>([]);
     cart$ = this.cartSubject.asObservable();
@@ -35,6 +38,7 @@ export class ProductService {
     constructor() { 
         this.initializeFavoritesFromStorage();
         this.initializeCartFromStorage();
+        this.updateFavoritesCount();
     }
 
     private initializeFavoritesFromStorage() {
@@ -87,9 +91,15 @@ export class ProductService {
         this.products = this.products.filter((product) => product.id !== id);
     }
 
+    private updateFavoritesCount() {
+        const count = this.products.filter((product) => product.isFavorite).length;
+        this.favoritesCountSubject.next(count);
+    }
+
     switchFav(product: Product) {
         product.isFavorite = !product.isFavorite;
         localStorage.setItem('fav', JSON.stringify(this.products.filter((product) => product.isFavorite).map((product) => product.id)));
+        this.updateFavoritesCount(); 
     }
 
     addToCart(product: Product, quantity: number = 1) {

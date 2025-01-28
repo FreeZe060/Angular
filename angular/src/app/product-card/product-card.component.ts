@@ -8,7 +8,10 @@ import { Router } from '@angular/router';
 	selector: 'app-product-card',
 	imports: [DatePipe, CommonModule],
 	template: `
-		<div class="flex-shrink-0 m-6 relative overflow-hidden rounded-lg max-w-xs shadow-lg" [ngClass]="[getRarityColor(product.rarity).bgColor]">
+		<div class="flex-shrink-0 m-6 relative overflow-hidden rounded-lg max-w-xs shadow-lg hover:scale-105 transition-transform duration-300"
+			[ngClass]="[getRarityColor(product.rarity).bgColor]"
+			(click)="navigateToProduct(product.id)"
+			style="cursor: pointer;">
 			<svg class="absolute bottom-0 left-0 mb-8" viewBox="0 0 375 283" fill="none" style="transform: scale(1.5); opacity: 0.1;">
 				<rect x="159.52" y="175" width="152" height="152" rx="8" transform="rotate(-45 159.52 175)" fill="white"/>
 				<rect y="107.48" width="152" height="152" rx="8" transform="rotate(-45 0 107.48)" fill="white"/> 
@@ -30,15 +33,15 @@ import { Router } from '@angular/router';
 					<div class="flex items-center">
 						@if (product.isFavorite) {
 							<span class="flex">
-								<button (click)="switchFav()"><i class="fa-solid fa-heart fa-lg mr-3"></i></button>
+								<button (click)="switchFav(); $event.stopPropagation()"><i class="fa-solid fa-heart fa-lg mr-3"></i></button>
 							</span>
 						} @else {
 							<span class="flex">
-								<button (click)="switchFav()"><i class="hover:fa-solid fa-regular fa-heart fa-lg mr-3"></i></button>
+								<button (click)="switchFav(); $event.stopPropagation()"><i class="hover:fa-solid fa-regular fa-heart fa-lg mr-3"></i></button>
 							</span>
 						}
 						
-						<button (click)="addtoCart()"><i class="fa-solid fa-cart-shopping fa-lg"></i></button>
+						<button (click)="addtoCart(); $event.stopPropagation()"><i class="fa-solid fa-cart-shopping fa-lg"></i></button>
 					</div>
 				</span>
 			</div>

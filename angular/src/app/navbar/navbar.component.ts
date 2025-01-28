@@ -104,7 +104,7 @@ export class NavbarComponent {
 	activeRoute: string = '/';
 	productService = inject(ProductService);
 	productCount: number = this.productService.getNumberOfProducts();
-	favoritesCount: number = this.productService.getNumberOfFavorites();
+	favoritesCount: number = 0;
 	cartCount: number = this.productService.getNumberOfCartItems();
 	cartItems = this.productService.getCart();
 	isCartPopupOpen = false;
@@ -113,9 +113,14 @@ export class NavbarComponent {
 
 	constructor() {
 		this.router.events.subscribe((event) => {
-			if (event instanceof NavigationEnd) {
-				this.activeRoute = event.urlAfterRedirects;
-			}
+		  if (event instanceof NavigationEnd) {
+			this.activeRoute = event.urlAfterRedirects;
+		  }
+		});
+	
+		// Abonnement au nombre de favoris
+		this.productService.favoritesCount$.subscribe(count => {
+		  this.favoritesCount = count;
 		});
 	}
 
