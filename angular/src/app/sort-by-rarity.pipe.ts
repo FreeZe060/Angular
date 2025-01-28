@@ -14,9 +14,9 @@ export class SortByRarity implements PipeTransform {
         const rarityA = this.rarityOrder.indexOf(a.rarity);
         const rarityB = this.rarityOrder.indexOf(b.rarity);
   
-        if (sortSelected === 'Common-Legendary') {
+        if (sortSelected === '↓ Rareté') {
           return rarityA - rarityB; 
-        } else if (sortSelected === 'Legendary-Common') {
+        } else if (sortSelected === '↑ Rareté') {
           return rarityB - rarityA; 
         } else {
           return 0; 

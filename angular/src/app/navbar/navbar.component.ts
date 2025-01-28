@@ -18,7 +18,7 @@ import { Router, NavigationEnd, RouterLink } from '@angular/router';
 					<i class="fas fa-home p-2 bg-gray-800 rounded-full"></i>
 				</a>
 
-				<a routerLink="/products"
+				<a routerLink="#produits" href="#produits"
 					class="px-3 py-1 relative cursor-pointer hover:text-gray-300 text-base rounded mb-5 transition-all duration-300"
 					[class.text-gray-300]="activeRoute.startsWith('/product')">
 					<i class="w-8 fas fa-address-card p-2 bg-gray-800 rounded-full"></i>
@@ -68,6 +68,7 @@ export class NavbarComponent {
 	productService = inject(ProductService);
 	productCount: number = this.productService.getNumberOfProducts();
 	favoritesCount: number = this.productService.getNumberOfFavorites();
+	
 	private router = inject(Router);
 
 	constructor() {
@@ -76,5 +77,6 @@ export class NavbarComponent {
 				this.activeRoute = event.urlAfterRedirects;
 			}
 		});
+		
 	}
 }

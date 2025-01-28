@@ -9,9 +9,9 @@ export class SortByDate implements PipeTransform {
 	transform(products: Product[], sortSelected: string): Product[] {
 		return products.sort((a, b) => {
 			switch (sortSelected) {
-				case '+ recent':
+				case '+ Récent':
 					return b.createdDate.getTime() - a.createdDate.getTime();
-				case '- recent':
+				case '- Récent':
 					return a.createdDate.getTime() - b.createdDate.getTime();
 				default:
 					return 0;

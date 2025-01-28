@@ -31,12 +31,10 @@ import { Router } from '@angular/router';
 						@if (product.isFavorite) {
 							<span class="flex">
 								<button (click)="switchFav()"><i class="fa-solid fa-heart fa-lg mr-3"></i></button>
-								<!-- <p><b>Favorite!</b></p> -->
 							</span>
 						} @else {
 							<span class="flex">
 								<button (click)="switchFav()"><i class="hover:fa-solid fa-regular fa-heart fa-lg mr-3"></i></button>
-								<!-- <p>Simple Product</p> -->
 							</span>
 						}
 						
@@ -44,6 +42,8 @@ import { Router } from '@angular/router';
 					</div>
 				</span>
 			</div>
+
+			<div class="absolute bottom-0 p-1 pl-2 font-semibold text-sm" [ngClass]="[getRarityColor(product.rarity).textColor]">{{ product.rarity }}</div>
 		</div>
 	`,
 	styles: ``
@@ -67,17 +67,17 @@ export class ProductCardComponent {
 	getRarityColor(rarity: Rarity): { textColor: string, bgColor: string } {
 		switch (rarity) {
 			case Rarity.Common:
-				return { textColor: 'text-gray-500', bgColor: 'bg-gray-500' };
+				return { textColor: 'text-gray-600', bgColor: 'bg-gray-500' };
 			case Rarity.Uncommon:
-				return { textColor: 'text-green-500', bgColor: 'bg-green-500' };
+				return { textColor: 'text-green-600', bgColor: 'bg-green-500' };
 			case Rarity.Rare:
-				return { textColor: 'text-teal-500', bgColor: 'bg-teal-500' };
+				return { textColor: 'text-teal-600', bgColor: 'bg-teal-500' };
 			case Rarity.Epic:
-				return { textColor: 'text-purple-500', bgColor: 'bg-purple-500' };
+				return { textColor: 'text-purple-600', bgColor: 'bg-purple-500' };
 			case Rarity.Legendary:
-				return { textColor: 'text-orange-500', bgColor: 'bg-orange-500' };
+				return { textColor: 'text-orange-600', bgColor: 'bg-orange-500' };
 			default:
-				return { textColor: 'text-gray-500', bgColor: 'bg-gray-500' };
+				return { textColor: 'text-gray-600', bgColor: 'bg-gray-500' };
 		}
 	}
 	
