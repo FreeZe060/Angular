@@ -5,10 +5,11 @@ import { ProductService } from '../product-service.service';
 import { FormsModule } from '@angular/forms';
 import { SortByName } from '../sort-by-name.pipe';
 import { SearchByTermPipe } from "../search-by-term.pipe";
+import { SortByRarity } from "../sort-by-rarity.pipe";
 
 @Component({
     selector: 'app-products-list',
-    imports: [ProductCardComponent, SortByDate, FormsModule, SortByName, SearchByTermPipe],
+    imports: [ProductCardComponent, SortByDate, FormsModule, SortByName, SearchByTermPipe, SortByRarity],
     template: `
         <div class="px-5 py-8 bg-gray-100 min-h-screen">
 
