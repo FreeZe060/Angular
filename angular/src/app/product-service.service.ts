@@ -25,8 +25,8 @@ export class ProductService {
         { id: 15, name: 'Remus Lupin', isFavorite: false, createdDate: new Date(1960, 2, 10), rarity: Rarity.Common, price: 9.99, img: '/media/lupin.jpg' },
         { id: 16, name: 'Bellatrix Lestrange', isFavorite: false, createdDate: new Date(1951, 9, 1), rarity: Rarity.Rare, price: 49.99, img: '/media/bellatrix.jpg' },
         { id: 17, name: 'Voldemort', isFavorite: false, createdDate: new Date(1926, 12, 31), rarity: Rarity.Legendary, price: 99.99, img: '/media/voldemort.jpg' },
-        { id: 18, name: 'Dobby', isFavorite: false, createdDate: new Date(1979, 6, 28), rarity: Rarity.Epic, price: 59.99, img: '/media/dobby.jpg' },
-        { id: 19, name: 'Cedric Diggory', isFavorite: false, createdDate: new Date(1977, 9, 22), rarity: Rarity.Rare, price: 49.99, img: '/media/cedric.jpg' },
+        { id: 18, name: 'Dobby', isFavorite: false, createdDate: new Date(1979, 6, 28), rarity: Rarity.Rare, price: 59.99, img: '/media/dobby.jpg' },
+        { id: 19, name: 'Cedric Diggory', isFavorite: false, createdDate: new Date(1977, 9, 22), rarity: Rarity.Uncommon, price: 49.99, img: '/media/cedric.jpg' },
         { id: 20, name: 'Fleur Delacour', isFavorite: false, createdDate: new Date(1977, 8, 30), rarity: Rarity.Common, price: 19.99, img: '/media/fleur.jpg' },
     ] as Product[];
 
