@@ -41,7 +41,7 @@ import { SortByRarity } from "../sort-by-rarity.pipe";
             </div>
 
             <div class="flex justify-center items-center p-5 gap-5 flex-wrap">
-                @for (p of (products | searchByTerm: searchTerm | sortByDate: sortOpt[sortSelected] | sortByName: sortOpt[sortSelected]); track p.id) {
+                @for (p of (products | searchByTerm: searchTerm | sortByDate: sortOpt[sortSelected] | sortByName: sortOpt[sortSelected] | sortByRarity:sortOpt[sortSelected] ); track p.id) {
                     <app-product-card [product]="p" (addItemEvent)="addItem($event)"></app-product-card>
                 }
             </div>
@@ -52,7 +52,7 @@ import { SortByRarity } from "../sort-by-rarity.pipe";
 })
 
 export class ProductsListComponent {
-    sortOpt = ['A-Z', 'Z-A', '+ recent', '- recent'];
+    sortOpt = ['A-Z', 'Z-A', '+ recent', '- recent','Common-Legendary', 'Legendary-Common'];
     sortSelected = 0;
     countFav = 0;
     searchTerm = '';
