@@ -28,8 +28,13 @@ export class ProductService {
     private productsSubject = new BehaviorSubject<Product[]>(this.products);
     products$ = this.productsSubject.asObservable();
 
+    private cart: { product: Product, quantity: number }[] = [];
+    private cartSubject = new BehaviorSubject<{ product: Product, quantity: number }[]>([]);
+    cart$ = this.cartSubject.asObservable();
+
     constructor() { 
         this.initializeFavoritesFromStorage();
+        this.initializeCartFromStorage();
     }
 
     private initializeFavoritesFromStorage() {
@@ -41,6 +46,19 @@ export class ProductService {
                     return favorite ? { ...product, isFavorite: favorite } : product;
                 });
                 this.productsSubject.next(this.products);
+            }
+        }
+    }
+
+    private initializeCartFromStorage() {
+        if (typeof window !== 'undefined' && localStorage) {
+            const storedCart = JSON.parse(localStorage.getItem('cart') || '[]');
+            if (storedCart.length > 0) {
+                this.cart = storedCart.map((item: any) => ({
+                    product: this.products.find(p => p.id === item.id)!,
+                    quantity: item.quantity,
+                }));
+                this.cartSubject.next(this.cart);
             }
         }
     }
@@ -72,5 +90,37 @@ export class ProductService {
     switchFav(product: Product) {
         product.isFavorite = !product.isFavorite;
         localStorage.setItem('fav', JSON.stringify(this.products.filter((product) => product.isFavorite).map((product) => product.id)));
+    }
+
+    addToCart(product: Product, quantity: number = 1) {
+        const existingItem = this.cart.find(item => item.product.id === product.id);
+        if (existingItem) {
+            existingItem.quantity += quantity;
+        } else {
+            this.cart.push({ product, quantity });
+        }
+        this.updateCartStorage();
+    }
+
+    removeFromCart(productId: number) {
+        this.cart = this.cart.filter(item => item.product.id !== productId);
+        this.updateCartStorage();
+    }
+
+    updateCartStorage() {
+        const cartData = this.cart.map(item => ({
+            id: item.product.id,
+            quantity: item.quantity,
+        }));
+        localStorage.setItem('cart', JSON.stringify(cartData));
+        this.cartSubject.next(this.cart);
+    }
+
+    getCart() {
+        return this.cart;
+    }
+
+    getNumberOfCartItems() {
+        return this.cart.reduce((total, item) => total + item.quantity, 0);
     }
 }

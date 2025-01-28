@@ -38,7 +38,7 @@ import { Router } from '@angular/router';
 							</span>
 						}
 						
-						<i class="fa-solid fa-cart-shopping fa-lg"></i>
+						<button (click)="addtoCart()"><i class="fa-solid fa-cart-shopping fa-lg"></i></button>
 					</div>
 				</span>
 			</div>
@@ -62,6 +62,11 @@ export class ProductCardComponent {
 	switchFav() {
 		this.productService.switchFav(this.product);
 		this.addItemEvent.emit(this.product.isFavorite ? 1 : -1);
+	}
+
+	addtoCart() {
+		this.productService.addToCart(this.product);
+		this.addItemEvent.emit(1);
 	}
 
 	getRarityColor(rarity: Rarity): { textColor: string, bgColor: string } {

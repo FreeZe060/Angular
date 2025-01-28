@@ -1,11 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { ProductService } from '../product-service.service';
 import { Router, NavigationEnd, RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
 	selector: 'app-navbar',
 	standalone: true,
-	imports: [RouterLink],
+	imports: [RouterLink, CommonModule],
 	template: `
 		<div class="fixed p-4 w-full z-10">
 			<div class="p-5 text-gray-500 bg-gray-900 rounded-lg shadow-lg font-medium capitalize">
@@ -18,7 +19,7 @@ import { Router, NavigationEnd, RouterLink } from '@angular/router';
 					<i class="fas fa-home p-2 bg-gray-800 rounded-full"></i>
 				</a>
 
-				<a routerLink="#produits" href="#produits"
+				<a routerLink="" href=""
 					class="px-3 py-1 relative cursor-pointer hover:text-gray-300 text-base rounded mb-5 transition-all duration-300"
 					[class.text-gray-300]="activeRoute.startsWith('/product')">
 					<i class="w-8 fas fa-address-card p-2 bg-gray-800 rounded-full"></i>
@@ -38,6 +39,34 @@ import { Router, NavigationEnd, RouterLink } from '@angular/router';
 					</span>
 				</a>
 
+				@if (isCartPopupOpen) {
+					<div class="absolute bg-gray-900 text-white p-2 rounded-lg shadow-lg mt-2 w-64 right-4">
+						<h3 class="font-semibold text-lg mb-2">Votre panier</h3>
+						@if (cartItems.length > 0) {
+							@for (item of cartItems; track item.product.id) {
+								<div class="flex items-center justify-between mb-3">
+									<img [src]="item.product.img" alt="{{ item.product.name }}" class="w-12 h-12 rounded-lg" />
+									<div class="ml-3">
+										<p class="text-sm font-medium">{{ item.product.name }}</p>
+										<p class="text-xs text-gray-400">{{ item.product.price | currency:'EUR' }}</p>
+									</div>
+									<button (click)="removeFromCart(item.product.id)" class="text-red-500 hover:underline text-xs">
+										<i class="fa-solid fa-delete-left"></i>
+									</button>
+								</div>
+							}
+							<div class="mt-4 text-right">
+								<a routerLink="/panier" class="bg-blue-600 px-3 py-1 text-sm rounded-lg hover:bg-blue-700 transition">
+									Voir le panier
+								</a>
+							</div>
+						} @else {
+							<p class="text-sm text-gray-400">Votre panier est vide.</p>
+						}
+					</div>
+				}
+
+
 				<span class="px-1 hover:text-white cursor-pointer transition-all duration-300">
 					<i class="fas fa-search p-2 bg-gray-800 rounded-full"></i>
 				</span>
@@ -56,19 +85,30 @@ import { Router, NavigationEnd, RouterLink } from '@angular/router';
 						3
 					</span>
 				</span>
+				<span (click)="toggleCartPopup()"
+					class="px-3 relative cursor-pointer hover:text-gray-300 text-base float-right rounded mb-5 transition-all duration-300">
+					<i class="w-8 fa-solid fa-cart-shopping p-2 bg-gray-800 rounded-full"></i>
+					<span class="mx-1">Panier</span>
+					<span class="absolute left-0 ml-8 -mt-2 text-xs bg-gray-700 font-medium px-2 shadow-lg rounded-full">
+						{{ cartCount }}
+					</span>
+				</span>
 			</div>
 		</div>
+
 		<div class="h-[104px]"></div>
 	`,
 	styles: []
 })
-
 export class NavbarComponent {
 	activeRoute: string = '/';
 	productService = inject(ProductService);
 	productCount: number = this.productService.getNumberOfProducts();
 	favoritesCount: number = this.productService.getNumberOfFavorites();
-	
+	cartCount: number = this.productService.getNumberOfCartItems();
+	cartItems = this.productService.getCart();
+	isCartPopupOpen = false;
+
 	private router = inject(Router);
 
 	constructor() {
@@ -77,6 +117,15 @@ export class NavbarComponent {
 				this.activeRoute = event.urlAfterRedirects;
 			}
 		});
-		
+	}
+
+	toggleCartPopup() {
+		this.isCartPopupOpen = !this.isCartPopupOpen;
+	}
+
+	removeFromCart(id: number) {
+		this.productService.removeFromCart(id);
+		this.cartItems = this.productService.getCart();
+		this.cartCount = this.cartItems.length;
 	}
 }
