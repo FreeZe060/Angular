@@ -105,26 +105,27 @@ export class ProductService {
     addToCart(product: Product, quantity: number = 1) {
         const existingItem = this.cart.find(item => item.product.id === product.id);
         if (existingItem) {
-            existingItem.quantity += quantity;
+            existingItem.quantity = quantity;  
         } else {
             this.cart.push({ product, quantity });
         }
         this.updateCartStorage();
     }
-
+      
     removeFromCart(productId: number) {
         this.cart = this.cart.filter(item => item.product.id !== productId);
         this.updateCartStorage();
     }
-
+      
     updateCartStorage() {
         const cartData = this.cart.map(item => ({
-            id: item.product.id,
-            quantity: item.quantity,
+          id: item.product.id,
+          quantity: item.quantity,
         }));
         localStorage.setItem('cart', JSON.stringify(cartData));
         this.cartSubject.next(this.cart);
     }
+      
 
     getCart() {
         return this.cart;
