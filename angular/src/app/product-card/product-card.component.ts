@@ -20,28 +20,30 @@ import { Router } from '@angular/router';
 			<div class="relative text-white px-6 pb-6 mt-6">
 				<span class="block opacity-75 -mb-1">{{product.createdDate | date:'shortDate'}}</span>
 				<div class="flex justify-between">
-				<span class="block font-semibold text-l">{{product.name}}</span>
-				
+					<span class="block font-semibold text-l">{{product.name}}</span>
 				</div>
 			</div>
-			<div class="relative text-white px-6 pb-6">
-				<span class="bg-white rounded-full text-sm font-bold px-3 py-2 leading-none flex items-center" [ngClass]="[getRarityColor(product.rarity).textColor]">{{ product.price }}€</span>
+			<div class="relative text-white px-6 pb-6 mb-1">
+				<span class="bg-white rounded-full text-sm font-bold px-3 py-2 leading-none flex items-center justify-between" [ngClass]="[getRarityColor(product.rarity).textColor]">
+					{{ product.price }}€
+
+					<div class="flex items-center">
+						@if (product.isFavorite) {
+							<span class="flex">
+								<button (click)="switchFav()"><i class="fa-solid fa-heart fa-lg mr-3"></i></button>
+								<!-- <p><b>Favorite!</b></p> -->
+							</span>
+						} @else {
+							<span class="flex">
+								<button (click)="switchFav()"><i class="hover:fa-solid fa-regular fa-heart fa-lg mr-3"></i></button>
+								<!-- <p>Simple Product</p> -->
+							</span>
+						}
+						
+						<i class="fa-solid fa-cart-shopping fa-lg"></i>
+					</div>
+				</span>
 			</div>
-			<div class="flex justify-between">
-				<div class="absolute my-2">
-					@if (product.isFavorite) {
-						<span class="flex">
-							<button (click)="switchFav()"><i class="fa-solid fa-heart mr-3"></i></button>
-							<!-- <p><b>Favorite!</b></p> -->
-						</span>
-					} @else {
-						<span class="flex">
-							<button (click)="switchFav()"><i class="fa-regular fa-heart hover:fa-solid mr-3"></i></button>
-							<!-- <p>Simple Product</p> -->
-						</span>
-					}
-				</div>
-            </div>
 		</div>
 	`,
 	styles: ``

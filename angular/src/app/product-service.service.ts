@@ -13,7 +13,7 @@ export class ProductService {
         { id: 3, name: 'Hermione Granger', isFavorite: false, createdDate: new Date(1979, 8, 19), rarity: Rarity.Epic, price: 49, img: '/media/hermione.jpg' },
         { id: 4, name: 'Neville Londubas', isFavorite: false, createdDate: new Date(1980, 7, 30), rarity: Rarity.Uncommon, price: 19, img: '/media/londubas.jpg' },
         { id: 5, name: 'Albus Dumbledore', isFavorite: false, createdDate: new Date(1881, 7, 30), rarity: Rarity.Legendary, price: 89, img: '/media/albus.jpg' },
-        { id: 6, name: 'Severus Snape', isFavorite: false, createdDate: new Date(1960, 1, 9), rarity: Rarity.Common, price: 19, img: '/media/severus.jpg' },
+        { id: 6, name: 'Severus Snape', isFavorite: false, createdDate: new Date(1960, 1, 9), rarity: Rarity.Rare, price: 39.99, img: '/media/severus.jpg' },
         { id: 7, name: 'Draco Malfoy', isFavorite: false, createdDate: new Date(1980, 5, 5), rarity: Rarity.Epic, price: 59, img: '/media/drago.jpg' },
         { id: 8, name: 'Luna Lovegood', isFavorite: false, createdDate: new Date(1981, 2, 13), rarity: Rarity.Uncommon, price: 24.99, img: '/media/luna.jpg' },
         { id: 9, name: 'Ginny Weasley', isFavorite: false, createdDate: new Date(1981, 7, 11), rarity: Rarity.Common, price: 29.99, img: '/media/ginny.jpg' },
