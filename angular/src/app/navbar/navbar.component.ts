@@ -46,12 +46,22 @@ import { CommonModule } from '@angular/common';
 							@for (item of cartItems; track item.product.id) {
 								<div class="flex items-center justify-between mb-3">
 									<img [src]="item.product.img" alt="{{ item.product.name }}" class="w-12 h-12 rounded-lg" />
-									<div class="ml-3">
-										<p class="text-sm font-medium">{{ item.product.name }}</p>
-										<p class="text-xs text-gray-400">{{ item.product.price | currency:'EUR' }}</p>
+									<div class="">
+									<p class="text-sm font-medium">{{ item.product.name }}</p>
+									<p class="text-xs text-gray-400">{{ item.product.price | currency:'EUR' }}</p>
+									<!-- Affichage du bouton de modification de quantitÃ© -->
+									<div class="flex items-center">
+										<button (click)="updateQuantity(item.product.id, item.quantity - 1)" class="text-gray-500 hover:text-gray-300">
+										-
+										</button>
+										<span class="mx-2">{{ item.quantity }}</span>
+										<button (click)="updateQuantity(item.product.id, item.quantity + 1)" class="text-gray-500 hover:text-gray-300">
+										+
+										</button>
+									</div>
 									</div>
 									<button (click)="removeFromCart(item.product.id)" class="text-red-500 hover:underline text-xs">
-										<i class="fa-solid fa-delete-left"></i>
+									<i class="fa-solid fa-delete-left"></i>
 									</button>
 								</div>
 							}
@@ -104,8 +114,8 @@ export class NavbarComponent {
 	activeRoute: string = '/';
 	productService = inject(ProductService);
 	productCount: number = this.productService.getNumberOfProducts();
-	favoritesCount: number = this.productService.getNumberOfFavorites();
-	cartCount: number = this.productService.getNumberOfCartItems();
+	favoritesCount: number = 0;
+	cartCount: number = 0;
 	cartItems = this.productService.getCart();
 	isCartPopupOpen = false;
 
@@ -113,10 +123,19 @@ export class NavbarComponent {
 
 	constructor() {
 		this.router.events.subscribe((event) => {
-			if (event instanceof NavigationEnd) {
-				this.activeRoute = event.urlAfterRedirects;
-			}
+		  if (event instanceof NavigationEnd) {
+			this.activeRoute = event.urlAfterRedirects;
+		  }
 		});
+	
+		this.productService.favoritesCount$.subscribe(count => {
+		  this.favoritesCount = count;
+		});
+
+		this.productService.cart$.subscribe(cart => {
+			this.cartItems = cart;
+			this.cartCount = this.productService.getNumberOfCartItems(); 
+		  });
 	}
 
 	toggleCartPopup() {
@@ -128,4 +147,16 @@ export class NavbarComponent {
 		this.cartItems = this.productService.getCart();
 		this.cartCount = this.cartItems.length;
 	}
+
+	updateQuantity(productId: number, quantity: number) {
+		if (quantity < 0) {
+			return;
+		}
+		
+		if (quantity === 0) {
+			this.productService.removeFromCart(productId);
+		} else {
+			this.productService.addToCart(this.productService.getProduct(productId)!, quantity);
+		}
+	}	
 }

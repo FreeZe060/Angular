@@ -23,10 +23,18 @@ export class ProductService {
         { id: 13, name: 'Hagrid', isFavorite: false, createdDate: new Date(1928, 11, 6), rarity: Rarity.Epic, price: 59.99, img: '/media/hagrid.jpg' },
         { id: 14, name: 'Sirius Black', isFavorite: false, createdDate: new Date(1960, 10, 11), rarity: Rarity.Common, price: 19.99, img: '/media/sirius.jpg' },
         { id: 15, name: 'Remus Lupin', isFavorite: false, createdDate: new Date(1960, 2, 10), rarity: Rarity.Common, price: 9.99, img: '/media/lupin.jpg' },
+        { id: 16, name: 'Bellatrix Lestrange', isFavorite: false, createdDate: new Date(1951, 9, 1), rarity: Rarity.Rare, price: 49.99, img: '/media/bellatrix.jpg' },
+        { id: 17, name: 'Voldemort', isFavorite: false, createdDate: new Date(1926, 12, 31), rarity: Rarity.Legendary, price: 99.99, img: '/media/voldemort.jpg' },
+        { id: 18, name: 'Dobby', isFavorite: false, createdDate: new Date(1979, 6, 28), rarity: Rarity.Epic, price: 59.99, img: '/media/dobby.jpg' },
+        { id: 19, name: 'Cedric Diggory', isFavorite: false, createdDate: new Date(1977, 9, 22), rarity: Rarity.Rare, price: 49.99, img: '/media/cedric.jpg' },
+        { id: 20, name: 'Fleur Delacour', isFavorite: false, createdDate: new Date(1977, 8, 30), rarity: Rarity.Common, price: 19.99, img: '/media/fleur.jpg' },
     ] as Product[];
 
     private productsSubject = new BehaviorSubject<Product[]>(this.products);
     products$ = this.productsSubject.asObservable();
+
+    private favoritesCountSubject = new BehaviorSubject<number>(0);
+    favoritesCount$ = this.favoritesCountSubject.asObservable();
 
     private cart: { product: Product, quantity: number }[] = [];
     private cartSubject = new BehaviorSubject<{ product: Product, quantity: number }[]>([]);
@@ -35,6 +43,7 @@ export class ProductService {
     constructor() { 
         this.initializeFavoritesFromStorage();
         this.initializeCartFromStorage();
+        this.updateFavoritesCount();
     }
 
     private initializeFavoritesFromStorage() {
@@ -87,34 +96,41 @@ export class ProductService {
         this.products = this.products.filter((product) => product.id !== id);
     }
 
+    private updateFavoritesCount() {
+        const count = this.products.filter((product) => product.isFavorite).length;
+        this.favoritesCountSubject.next(count);
+    }
+
     switchFav(product: Product) {
         product.isFavorite = !product.isFavorite;
         localStorage.setItem('fav', JSON.stringify(this.products.filter((product) => product.isFavorite).map((product) => product.id)));
+        this.updateFavoritesCount(); 
     }
 
     addToCart(product: Product, quantity: number = 1) {
         const existingItem = this.cart.find(item => item.product.id === product.id);
         if (existingItem) {
-            existingItem.quantity += quantity;
+            existingItem.quantity = quantity;  
         } else {
             this.cart.push({ product, quantity });
         }
         this.updateCartStorage();
     }
-
+      
     removeFromCart(productId: number) {
         this.cart = this.cart.filter(item => item.product.id !== productId);
         this.updateCartStorage();
     }
-
+      
     updateCartStorage() {
         const cartData = this.cart.map(item => ({
-            id: item.product.id,
-            quantity: item.quantity,
+          id: item.product.id,
+          quantity: item.quantity,
         }));
         localStorage.setItem('cart', JSON.stringify(cartData));
         this.cartSubject.next(this.cart);
     }
+      
 
     getCart() {
         return this.cart;
