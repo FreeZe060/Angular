@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, ElementRef, HostListener, inject } from '@angular/core';
 import { ProductService } from '../product-service.service';
 import { Router, NavigationEnd, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -120,6 +120,7 @@ export class NavbarComponent {
 	isCartPopupOpen = false;
 
 	private router = inject(Router);
+	private elementRef = inject(ElementRef);
 
 	constructor() {
 		this.router.events.subscribe((event) => {
@@ -159,4 +160,14 @@ export class NavbarComponent {
 			this.productService.addToCart(this.productService.getProduct(productId)!, quantity);
 		}
 	}	
+
+	@HostListener('document:click', ['$event'])
+	onDocumentClick(event: MouseEvent): void {
+		const targetElement = event.target as HTMLElement;
+
+		// Check if the click is outside the popup
+		if (this.isCartPopupOpen && !this.elementRef.nativeElement.contains(targetElement)) {
+			this.isCartPopupOpen = false;
+		}
+	}
 }
