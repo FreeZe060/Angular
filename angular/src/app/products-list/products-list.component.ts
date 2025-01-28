@@ -1,5 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, inject } from '@angular/core';
 import { ProductCardComponent } from '../product-card/product-card.component';
 import { SortByDate } from '../sort-by-date.pipe';
 import { ProductService } from '../product-service.service';
@@ -12,7 +11,7 @@ import { SortByRarity } from "../sort-by-rarity.pipe";
     selector: 'app-products-list',
     imports: [ProductCardComponent, SortByDate, FormsModule, SortByName, SearchByTermPipe, SortByRarity],
     template: `
-        <div class="px-5 py-8 bg-gray-100 min-h-screen" id="produits">
+        <div class="px-5 py-8 bg-gray-100 min-h-screen">
 
             <div class="px-5 flex gap-16 items-center justify-center bg-white shadow-xl rounded-lg p-4">
                 <div class="flex items-center bg-gray-100 p-2 rounded-lg">
@@ -42,7 +41,7 @@ import { SortByRarity } from "../sort-by-rarity.pipe";
             </div>
 
             <div class="flex justify-center items-center p-5 gap-5 flex-wrap">
-                @for (p of (filteredProducts() | searchByTerm: searchTerm | sortByDate: sortOpt[sortSelected] | sortByName: sortOpt[sortSelected] | sortByRarity:sortOpt[sortSelected] ); track p.id) {
+                @for (p of (products | searchByTerm: searchTerm | sortByDate: sortOpt[sortSelected] | sortByName: sortOpt[sortSelected] | sortByRarity:sortOpt[sortSelected] ); track p.id) {
                     <app-product-card [product]="p" (addItemEvent)="addItem($event)"></app-product-card>
                 }
             </div>
@@ -53,40 +52,15 @@ import { SortByRarity } from "../sort-by-rarity.pipe";
 })
 
 export class ProductsListComponent {
-    sortOpt = ['A-Z', 'Z-A', '+ Récent', '- Récent', '↑ Rareté', '↓ Rareté'];
+    sortOpt = ['A-Z', 'Z-A', '+ Récent', '- Récent','↑ Rareté', '↓ Rareté'];
     sortSelected = 0;
+    countFav = 0;
     searchTerm = '';
-    showFavorites = false;
     productService = inject(ProductService);
-
     products = this.productService.getProducts();
-    countFav: number = this.productService.getNumberOfFavorites();
-    private activatedRoute = inject(ActivatedRoute);
 
     addItem(item: number) {
         this.countFav += item;
-    }
-
-    ngOnInit() {
-        this.activatedRoute.url.subscribe((urlSegments) => {
-            this.showFavorites = urlSegments.some(segment => segment.path === 'favoris');
-        });
-    }
-
-    filteredProducts() {
-        let filtered = this.products;
-
-        if (this.showFavorites) {
-            filtered = filtered.filter(product => product.isFavorite);
-        }
-
-        if (this.searchTerm) {
-            filtered = filtered.filter(product =>
-                product.name.toLowerCase().includes(this.searchTerm.toLowerCase())
-            );
-        }
-
-        return filtered;
     }
 
 }

@@ -1,9 +1,9 @@
 export enum Rarity {
-    Common = 'Commun',
-    Uncommon = 'Non-Commun',
-    Rare = 'Rare',
-    Epic = 'Epique',
-    Legendary = 'Légendaire'
+    Common = 'common',
+    Uncommon = 'uncommon',
+    Rare = 'rare',
+    Epic = 'epic',
+    Legendary = 'legendary'
 }
 
 export interface Product {

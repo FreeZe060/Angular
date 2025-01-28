@@ -89,7 +89,6 @@ export class ProductService {
 
     switchFav(product: Product) {
         product.isFavorite = !product.isFavorite;
-        localStorage.setItem('fav', JSON.stringify(this.products.filter((product) => product.isFavorite).map((product) => product.id)));
     }
 
     addToCart(product: Product, quantity: number = 1) {
