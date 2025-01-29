@@ -3,6 +3,7 @@ import { ProductService } from '../product-service.service';
 import { Product } from '../product';
 import { Router, NavigationEnd, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import Swal from 'sweetalert2';
 @Component({
 	selector: 'app-checkout-page',
 	imports: [RouterLink, CommonModule],
@@ -157,12 +158,19 @@ export class CheckoutPageComponent {
 		}
 	}
 
-	onSubmit(event: Event) {
-		event.preventDefault();
-		setTimeout(() => {
-			this.router.navigate(['/']);
-		}, 100);
-		alert("Commande passée avec succès !");
-	}
+  onSubmit(event: Event) {
+    event.preventDefault(); // Empêche le rechargement de la page
+
+    // Afficher une alerte SweetAlert2
+    Swal.fire({
+      title: 'Succès !',
+      text: 'Votre formulaire a été soumis avec succès.',
+      icon: 'success',
+      confirmButtonText: 'OK'
+    }).then(() => {
+      // Redirection vers la page d'accueil après la confirmation
+      this.router.navigate(['/']);
+    });
+  }
 
 }
