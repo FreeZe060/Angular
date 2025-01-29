@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
 	template: `
     <section class="min-h-screen flex justify-center items-center bg-gray-100">
       <div class="max-w-3xl w-full bg-white p-8 rounded-lg shadow-md">
-        <form (ngSubmit)="onSubmit($event)" class="space-y-6">
+        <form (submit)="onSubmit($event)" class="space-y-6">
           <h2 class="text-2xl font-semibold text-gray-900 flex items-center gap-2">
             <i class="fas fa-shipping-fast"></i>
             Expedition Information
@@ -159,14 +159,10 @@ export class CheckoutPageComponent {
 
 	onSubmit(event: Event) {
 		event.preventDefault();
-	
-		if ((event.target as HTMLFormElement).checkValidity()) {
-			Promise.resolve().then(() => {
-				this.router.navigate(['/']);
-				alert("Commande passée avec succès !");
-			});
-		}
+		setTimeout(() => {
+			this.router.navigate(['/']);
+		}, 100);
+		alert("Commande passée avec succès !");
 	}
-  
 
 }
