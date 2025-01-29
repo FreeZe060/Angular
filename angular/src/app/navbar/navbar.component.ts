@@ -49,7 +49,6 @@ import { CommonModule } from '@angular/common';
 									<div class="">
 									<p class="text-sm font-medium">{{ item.product.name }}</p>
 									<p class="text-xs text-gray-400">{{ item.product.price | currency:'EUR' }}</p>
-									<!-- Affichage du bouton de modification de quantitÃ© -->
 									<div class="flex items-center">
 										<button (click)="updateQuantity(item.product.id, item.quantity - 1)" class="text-gray-500 hover:text-gray-300">
 										-

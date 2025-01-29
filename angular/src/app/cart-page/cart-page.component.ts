@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { ProductService } from '../product-service.service';
 import { Product } from '../product';
-
+import { Router, NavigationEnd, RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 @Component({
 	selector: 'app-cart-page',
+  imports: [RouterLink, CommonModule],
 	template: `
     <section>
       <div class="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8 min-h-screen">
@@ -86,9 +88,9 @@ import { Product } from '../product';
                     </div>
                   </dl>
 
-                  <div class="flex justify-end">
+                  <div class="flex justify-end cursor-pointer">
                     <a
-                      href="#"
+                      routerLink="/checkout"
                       class="block rounded bg-gray-700 px-5 py-3 text-base text-gray-100 transition hover:bg-gray-600"
                     >
                       Checkout
@@ -146,8 +148,6 @@ export class CartPageComponent implements OnInit {
 			}
 		}
 	}
-
-
 
 	calculateTotals() {
 		this.subtotal = this.cartItems.reduce((total, item) => total + item.product.price * item.quantity, 0);
