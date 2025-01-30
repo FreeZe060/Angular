@@ -50,7 +50,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // Utiliser l'API
-app.use('/api/pokemon', routes);
+app.use('/api/pokemons', routes);
 
 app.listen(port, () => {
     console.log(`Serveur marche sur le port ${port} avec Express server : http://localhost:${port}`);

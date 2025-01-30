@@ -1,4 +1,6 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { AsyncPipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductCardComponent } from '../product-card/product-card.component';
@@ -8,96 +10,84 @@ import { FormsModule } from '@angular/forms';
 import { SortByName } from '../sort-by-name.pipe';
 import { SearchByTermPipe } from "../search-by-term.pipe";
 import { SortByRarity } from "../sort-by-rarity.pipe";
-
+import { TitleCasePipe } from '@angular/common';
 import { PokemonService } from '../pokemon-service.service';
+import { PokemonCardComponent } from '../pokemon-card/pokemon-card.component';
 
 @Component({
-    imports: [ProductCardComponent, SortByDate, FormsModule, SortByName, SearchByTermPipe, SortByRarity, AsyncPipe],
+    imports: [PokemonCardComponent, SortByDate, FormsModule, SortByName, SearchByTermPipe, SortByRarity, AsyncPipe, TitleCasePipe],
+    selector: 'app-products-list',
     template: `
-        <div class="px-5 py-8 bg-gray-100 min-h-screen">
-
-            <div class="px-5 flex gap-16 items-center justify-center bg-white shadow-xl rounded-lg p-4">
-                <div class="flex items-center bg-gray-100 p-2 rounded-lg">
-                    <input
-                        type="text"
-                        [(ngModel)]="searchTerm"
-                        placeholder="Chercher des produits..."
-                        class="outline-none bg-transparent px-4 text-gray-700"
-                    />
-                    <button class="ml-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-                        Chercher
-                    </button>
+       <div class="container mx-auto p-4">
+            <div class="text-center mb-6">
+                <h1 class="text-4xl font-bold text-white">Pokémon List</h1>
+                <div class="mt-4">
+                <input
+                    type="text"
+                    [(ngModel)]="searchName"
+                    (ngModelChange)="onSearchChange()"
+                    class="px-4 py-2 rounded-full text-black w-full md:w-1/2 mx-auto"
+                    placeholder="Search Pokémon by name"
+                />
                 </div>
-                
-                <h2 class="text-xl font-semibold text-center text-gray-800">{{countFav}} Favoris</h2>
-
-                <div>
-                    <label class="text-gray-600 font-medium">Filtrer par</label>
-                    <select
-                        [(ngModel)]="sortSelected"
-                        class="ml-2 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-indigo-500">
-                        @for (so of sortOpt; track so) {
-                            <option [value]="$index">{{so}}</option>
-                        }
-                        </select>
+                <div class="mt-4">
+                <select
+                    [(ngModel)]="selectedType"
+                    (change)="onSearchChange()"
+                    class="px-4 py-2 rounded-full text-black"
+                >
+                    <option value="">Select Type</option>
+                    <option value="fire">Fire</option>
+                    <option value="water">Water</option>
+                    <option value="grass">Grass</option>
+                </select>
                 </div>
             </div>
 
-            <div class="flex justify-center items-center p-5 gap-5 flex-wrap">
-                <!-- @for (p of (filteredProducts() | searchByTerm: searchTerm | sortByDate: sortOpt[sortSelected] | sortByName: sortOpt[sortSelected] | sortByRarity:sortOpt[sortSelected] ); track p.id) {
-                    <app-product-card [product]="p" (addItemEvent)="addItem($event)"></app-product-card>
-                } -->
-                
-                @for (pokemon of pokemons| async; track pokemon.id) {
-                    <p>pokemon.name</p>
-                }
+                <div class="flex flex-wrap items-center gap-12">
+                    @for(pokemon of pokemons; track pokemon){
+                        <app-pokemon-card [pokemon]="pokemon"></app-pokemon-card>
+                    }
+                </div>
             </div>
-        </div>
-
     `,
-    styles: ``
+    styles: ``,
+    providers: []
 })
 
 export class ProductsListComponent {
-    sortOpt = ['A-Z', 'Z-A', '+ Récent', '- Récent', '↑ Rareté', '↓ Rareté'];
-    sortSelected = 0;
-    searchTerm = '';
-    showFavorites = false;
-    productService = inject(ProductService);
-    products = this.productService.getProducts();
-    countFav: number = this.productService.getNumberOfFavorites();
+    pokemons: any[] = [];
+    searchName: string = '';
+    selectedType: string = '';
+    sortBy: string = '';
 
-    pokemonService = inject(PokemonService);
-    pokemons = this.pokemonService.getPokemons();
+    private searchNameSubject = new Subject<string>();
 
-    addItem(item: number) {
-        this.countFav += item;
-    }
+    constructor(private pokemonService: PokemonService) { }
 
-    private activatedRoute = inject(ActivatedRoute);
-    
     ngOnInit() {
-        this.activatedRoute.url.subscribe((urlSegments) => {
-            this.showFavorites = urlSegments.some(segment => segment.path === 'favoris');
+        this.loadPokemons();
+        this.searchNameSubject.pipe(
+            debounceTime(300),
+            distinctUntilChanged(),
+            switchMap(() => this.pokemonService.getPokemons(this.searchName, this.selectedType, this.sortBy))
+        ).subscribe(data => {
+            this.pokemons = data;
         });
     }
 
-    filteredProducts() {
-        let filtered = this.products;
-
-        if (this.showFavorites) {
-            filtered = filtered.filter(product => product.isFavorite);
-        }
-
-        if (this.searchTerm) {
-            filtered = filtered.filter(product =>
-                product.name.toLowerCase().includes(this.searchTerm.toLowerCase())
-            );
-        }
-
-        return filtered;
+    onSearchChange() {
+        this.searchNameSubject.next(this.searchName);
     }
-    
-    
 
+    loadPokemons() {
+        this.pokemonService.getPokemons(this.searchName, this.selectedType, this.sortBy)
+            .subscribe(data => {
+                this.pokemons = data;
+            });
+    }
+
+    trackByFn(index: number, item: any) {
+        return item.id;
+    }
 }

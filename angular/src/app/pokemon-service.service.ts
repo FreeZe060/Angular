@@ -14,6 +14,7 @@ export class PokemonService {
     constructor(private http: HttpClient) { }
 
     getPokemons(name?: string, type?: string, sortBy?: string): Observable<Pokemon[]> {
+        console.log('Recherche des Pokémons...');
         let params = new HttpParams();
         if (name) params = params.set('name', name);
         if (type) params = params.set('type', type);
