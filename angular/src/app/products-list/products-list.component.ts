@@ -1,4 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductCardComponent } from '../product-card/product-card.component';
 import { SortByDate } from '../sort-by-date.pipe';
@@ -8,9 +9,10 @@ import { SortByName } from '../sort-by-name.pipe';
 import { SearchByTermPipe } from "../search-by-term.pipe";
 import { SortByRarity } from "../sort-by-rarity.pipe";
 
+import { PokemonService } from '../pokemon-service.service';
+
 @Component({
-    selector: 'app-products-list',
-    imports: [ProductCardComponent, SortByDate, FormsModule, SortByName, SearchByTermPipe, SortByRarity],
+    imports: [ProductCardComponent, SortByDate, FormsModule, SortByName, SearchByTermPipe, SortByRarity, AsyncPipe],
     template: `
         <div class="px-5 py-8 bg-gray-100 min-h-screen">
 
@@ -42,8 +44,12 @@ import { SortByRarity } from "../sort-by-rarity.pipe";
             </div>
 
             <div class="flex justify-center items-center p-5 gap-5 flex-wrap">
-                @for (p of (filteredProducts() | searchByTerm: searchTerm | sortByDate: sortOpt[sortSelected] | sortByName: sortOpt[sortSelected] | sortByRarity:sortOpt[sortSelected] ); track p.id) {
+                <!-- @for (p of (filteredProducts() | searchByTerm: searchTerm | sortByDate: sortOpt[sortSelected] | sortByName: sortOpt[sortSelected] | sortByRarity:sortOpt[sortSelected] ); track p.id) {
                     <app-product-card [product]="p" (addItemEvent)="addItem($event)"></app-product-card>
+                } -->
+                
+                @for (pokemon of pokemons| async; track pokemon.id) {
+                    <p>pokemon.name</p>
                 }
             </div>
         </div>
@@ -60,6 +66,9 @@ export class ProductsListComponent {
     productService = inject(ProductService);
     products = this.productService.getProducts();
     countFav: number = this.productService.getNumberOfFavorites();
+
+    pokemonService = inject(PokemonService);
+    pokemons = this.pokemonService.getPokemons();
 
     addItem(item: number) {
         this.countFav += item;
@@ -88,6 +97,7 @@ export class ProductsListComponent {
 
         return filtered;
     }
-
+    
+    
 
 }
