@@ -18,6 +18,7 @@ export class PokemonService {
         let params = new HttpParams();
         if (name) params = params.set('name', name);
         if (type) params = params.set('type', type);
+    
         if (sortBy) params = params.set('sortBy', sortBy);
     
         return this.http.get<Pokemon[]>(`${this.apiUrl}`, { params }).pipe(
@@ -25,6 +26,7 @@ export class PokemonService {
             catchError(this.handleError)
         );
     }
+    
 
     getPokemonById(id: string): Observable<Pokemon> {
         return this.http.get<Pokemon>(`${this.apiUrl}/${id}`).pipe(
@@ -34,7 +36,13 @@ export class PokemonService {
     }
 
     private handleError(error: HttpErrorResponse): Observable<never> {
-        console.error('Erreur API:', error);
-        return throwError(() => new Error('Une erreur est survenue, veuillez réessayer plus tard.'));
+        let errorMessage = 'Une erreur est survenue, veuillez réessayer plus tard.';
+        if (error.error instanceof ErrorEvent) {
+            errorMessage = `Erreur : ${error.error.message}`;
+        } else {
+            errorMessage = `Erreur ${error.status}: ${error.message}`;
+        }
+        console.error(errorMessage);
+        return throwError(() => new Error(errorMessage));
     }
 }

@@ -8,4 +8,4 @@ export interface Pokemon {
     type: string;
     rareté: string;
     prixMoyen: number;
-}
+}   
