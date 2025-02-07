@@ -1,26 +1,16 @@
-import { Product, Rarity } from './product';
 import { Pipe, PipeTransform } from '@angular/core';
+import { Pokemon } from './pokemon';
 
 @Pipe({
-  name: 'sortByRarity'
+  name: 'pokemonRarityFilter',
+  pure: false
 })
-export class SortByRarity implements PipeTransform {
-    private rarityOrder = [Rarity.Common, Rarity.Uncommon, Rarity.Rare, Rarity.Epic, Rarity.Legendary];
-  
-    transform(products: Product[], sortSelected: string): Product[] {
-      if (!products || !sortSelected) return products;
-  
-      return products.sort((a, b) => {
-        const rarityA = this.rarityOrder.indexOf(a.rarity);
-        const rarityB = this.rarityOrder.indexOf(b.rarity);
-  
-        if (sortSelected === '↓ Rareté') {
-          return rarityA - rarityB; 
-        } else if (sortSelected === '↑ Rareté') {
-          return rarityB - rarityA; 
-        } else {
-          return 0; 
-        }
-      });
-    }
+export class PokemonRarityFilter implements PipeTransform {
+  transform(pokemons: Pokemon[], selectedRarity: string): Pokemon[] {
+    if (!pokemons || !selectedRarity) return pokemons; // Si aucune rareté n'est sélectionnée, renvoie tous les Pokémon
+
+    return pokemons.filter(pokemon => {
+      return pokemon.rareté?.toLowerCase() === selectedRarity.toLowerCase();
+    });
   }
+}
