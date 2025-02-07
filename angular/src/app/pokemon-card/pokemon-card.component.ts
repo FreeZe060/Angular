@@ -288,7 +288,6 @@ import { PokemonService } from '../pokemon-service.service';
         }
 
         .shine-lines {
-            position: absolute;
             inset: 0;
             background: repeating-linear-gradient(
                 45deg,
