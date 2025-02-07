@@ -108,7 +108,6 @@ export class ProductsListComponent implements OnInit {
     }
 
     updateFilters() {
-      console.log('SortBy: ', this.sortBy); 
       this.searchTerms.next({
         name: this.searchName,
         type: this.selectedType,
@@ -118,7 +117,6 @@ export class ProductsListComponent implements OnInit {
   
     onSortChange(newSortBy: string) {
       this.sortBy = newSortBy;
-      console.log('SortBy mis à jour:', this.sortBy); 
       this.updateFilters();
     }
   

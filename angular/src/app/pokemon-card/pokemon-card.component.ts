@@ -19,6 +19,9 @@ import { PokemonService } from '../pokemon-service.service';
 				<span class="text-white font-bold">HP</span>
 				<span class="text-white font-bold">{{pokemon.hp}}</span>
 				</div>
+                <button (click)="toggleFavorite()" class="text-white">
+                    <i class="fa" [ngClass]="isFavorite ? 'fa-heart' : 'fa-heart-o'"></i>
+                </button>
 			</div>
 
 			<div class="relative aspect-square mb-3 rounded-lg overflow-hidden">
@@ -335,6 +338,7 @@ export class PokemonCardComponent {
     toggleFavorite() {
       this.pokemonService.switchFavorite(this.pokemon);
       this.isFavorite = !this.isFavorite;
+      console.log('Favoris mis à jour:', this.isFavorite);
     }
     
 }
