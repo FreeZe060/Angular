@@ -1,5 +1,5 @@
 import { Component, ElementRef, HostListener, inject } from '@angular/core';
-import { ProductService } from '../product-service.service';
+import { PokemonService } from '../pokemon-service.service';
 import { Router, NavigationEnd, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -43,23 +43,23 @@ import { CommonModule } from '@angular/common';
 					<div class="absolute bg-gray-900 text-white p-2 rounded-lg shadow-lg mt-2 w-64 right-4">
 						<h3 class="font-semibold text-lg mb-2">Votre panier</h3>
 						@if (cartItems.length > 0) {
-							@for (item of cartItems; track item.product.id) {
+							@for (item of cartItems; track item.pokemon.id) {
 								<div class="flex items-center justify-between mb-3">
-									<img [src]="item.product.img" alt="{{ item.product.name }}" class="w-12 h-12 rounded-lg" />
+									<img [src]="item.pokemon.image" alt="{{ item.pokemon.name }}" class="w-12 h-12 rounded-lg" />
 									<div class="">
-									<p class="text-sm font-medium">{{ item.product.name }}</p>
-									<p class="text-xs text-gray-400">{{ item.product.price | currency:'EUR' }}</p>
+									<p class="text-sm font-medium">{{ item.pokemon.name }}</p>
+									<p class="text-xs text-gray-400">{{ item.pokemon.prices | currency:'EUR' }}</p>
 									<div class="flex items-center">
-										<button (click)="updateQuantity(item.product.id, item.quantity - 1)" class="text-gray-500 hover:text-gray-300">
+										<button (click)="updateQuantity(+item.pokemon.id, item.quantity - 1)" class="text-gray-500 hover:text-gray-300">
 										-
 										</button>
 										<span class="mx-2">{{ item.quantity }}</span>
-										<button (click)="updateQuantity(item.product.id, item.quantity + 1)" class="text-gray-500 hover:text-gray-300">
+										<button (click)="updateQuantity(+item.pokemon.id, item.quantity + 1)" class="text-gray-500 hover:text-gray-300">
 										+
 										</button>
 									</div>
 									</div>
-									<button (click)="removeFromCart(item.product.id)" class="text-red-500 hover:underline text-xs">
+									<button (click)="removeFromCart(+item.pokemon.id)" class="text-red-500 hover:underline text-xs">
 									<i class="fa-solid fa-delete-left"></i>
 									</button>
 								</div>
@@ -111,11 +111,11 @@ import { CommonModule } from '@angular/common';
 })
 export class NavbarComponent {
 	activeRoute: string = '/';
-	productService = inject(ProductService);
-	productCount: number = this.productService.getNumberOfProducts();
+	private pokemonService = inject(PokemonService);
+	productCount: number = 0;
 	favoritesCount: number = 0;
 	cartCount: number = 0;
-	cartItems = this.productService.getCart();
+	cartItems = this.pokemonService.getCart();
 	isCartPopupOpen = false;
 
 	private router = inject(Router);
@@ -127,15 +127,15 @@ export class NavbarComponent {
 			this.activeRoute = event.urlAfterRedirects;
 		  }
 		});
-	
-		this.productService.favoritesCount$.subscribe(count => {
-		  this.favoritesCount = count;
+
+		this.pokemonService.favorites$.subscribe(favorites => {
+		  this.favoritesCount = favorites.length;
 		});
 
-		this.productService.cart$.subscribe(cart => {
+		this.pokemonService.cart$.subscribe(cart => {
 			this.cartItems = cart;
-			this.cartCount = this.productService.getNumberOfCartItems(); 
-		  });
+			this.cartCount = this.pokemonService.getNumberOfCartItems(); 
+		});
 	}
 
 	toggleCartPopup() {
@@ -143,28 +143,32 @@ export class NavbarComponent {
 	}
 
 	removeFromCart(id: number) {
-		this.productService.removeFromCart(id);
-		this.cartItems = this.productService.getCart();
+		this.pokemonService.removeFromCart(id);
+		this.cartItems = this.pokemonService.getCart();
 		this.cartCount = this.cartItems.length;
 	}
 
-	updateQuantity(productId: number, quantity: number) {
+	updateQuantity(pokemonId: number, quantity: number) {
 		if (quantity < 0) {
-			return;
+		  return;
 		}
-		
+	  
 		if (quantity === 0) {
-			this.productService.removeFromCart(productId);
+		  this.pokemonService.removeFromCart(pokemonId);
 		} else {
-			this.productService.addToCart(this.productService.getProduct(productId)!, quantity);
+		  this.pokemonService.getPokemons().subscribe(pokemons => {
+			const pokemon = pokemons.find(p => p.id === pokemonId.toString());  
+			if (pokemon) {
+			  this.pokemonService.addToCart(pokemon, quantity);
+			}
+		  });
 		}
-	}	
+	}  
 
 	@HostListener('document:click', ['$event'])
 	onDocumentClick(event: MouseEvent): void {
 		const targetElement = event.target as HTMLElement;
 
-		// Check if the click is outside the popup
 		if (this.isCartPopupOpen && !this.elementRef.nativeElement.contains(targetElement)) {
 			this.isCartPopupOpen = false;
 		}

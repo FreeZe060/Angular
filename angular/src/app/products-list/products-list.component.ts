@@ -1,17 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PokemonService } from '../pokemon-service.service';
 import { PokemonCardComponent } from '../pokemon-card/pokemon-card.component';
-import { PokemonSortPipe } from '../pokemon-sort.pipe';
 import { Pokemon } from '../pokemon';
-import { PokemonTypeFilter } from '../pokemonTypeFilter.pipe';
-import { PokemonSearchFilterPipe } from '../pokemonSearchFilter.pipe';
+import { SortByName} from '../sort-by-name.pipe';
+import { SortByPrice } from '../sort-by-price.pipe';
+import { SortByHp } from '../sort-by-hp.pipe';
+import { SortByRarity } from '../sort-by-rarity.pipe';
+import { SortByType } from '../sort-by-type.pipe';
 
 @Component({
-    imports: [PokemonCardComponent, FormsModule, PokemonSortPipe, PokemonTypeFilter, PokemonSearchFilterPipe],
+    imports: [PokemonCardComponent, FormsModule, SortByName, SortByPrice, SortByHp, SortByRarity, SortByType],
     selector: 'app-products-list',
     template: `
        <div class="container mx-auto p-4">
@@ -36,6 +37,15 @@ import { PokemonSearchFilterPipe } from '../pokemonSearchFilter.pipe';
                         <option value="grass">Plante</option>
                     </select>
 
+                    <select [(ngModel)]="selectedRarity" (ngModelChange)="updateFilters()" class="px-4 py-2 rounded-full text-black">
+                        <option value="">Toutes les raretés</option>
+                        <option>
+                            @for(rarity of allRarities; track rarity) {
+                                {{ rarity }}
+                            }
+                        </option>
+                    </select>
+
                     <select [(ngModel)]="sortBy" (ngModelChange)="updateFilters()" class="px-4 py-2 rounded-full text-black">
                         <option value="name_asc">A-Z</option>
                         <option value="name_desc">Z-A</option>
@@ -48,7 +58,7 @@ import { PokemonSearchFilterPipe } from '../pokemonSearchFilter.pipe';
             </div>
 
             <div class="flex flex-wrap items-center gap-12">
-                @for (pokemon of pokemons | pokemonSearchFilter:searchName:selectedType | pokemonSort:sortBy; track pokemon) {
+                @for (pokemon of filteredPokemons | sortByRarity:selectedRarity | sortByType:selectedType | sortByName:sortBy | sortByHp:sortBy | sortByPrice:sortBy; track trackByFn) {
                     <app-pokemon-card [pokemon]="pokemon"></app-pokemon-card>
                 }
             </div>
@@ -58,11 +68,15 @@ import { PokemonSearchFilterPipe } from '../pokemonSearchFilter.pipe';
     providers: []
 })
 export class ProductsListComponent implements OnInit {
+    @Input() pokemon: any;
     pokemons: Pokemon[] = [];
+    filteredPokemons: Pokemon[] = [];
+    favorites: Pokemon[] = [];
     searchName = '';
     selectedType = '';
+    selectedRarity = '';
     sortBy = 'name_asc';
-    favorites: Pokemon[] = [];  // Gérer les favoris avec cette variable
+    allRarities: string[] = [];
   
     private searchTerms = new Subject<{ name: string; type: string; sortBy: string }>();
   
@@ -74,13 +88,21 @@ export class ProductsListComponent implements OnInit {
         distinctUntilChanged(),
         switchMap(({ name, type, sortBy }) => this.pokemonService.getPokemons(name, type, sortBy))
       ).subscribe((data) => {
-        this.pokemons = data;
+        if (data && Array.isArray(data)) {
+          this.pokemons = data;
+          this.filteredPokemons = [...this.pokemons];
+  
+          this.allRarities = [...new Set(data.map(pokemon => pokemon.rarity))];
+        } else {
+          console.error('Données invalides reçues', data);
+        }
       });
   
       this.updateFilters();
     }
   
     updateFilters() {
+      console.log('SortBy: ', this.sortBy); 
       this.searchTerms.next({
         name: this.searchName,
         type: this.selectedType,
@@ -88,13 +110,22 @@ export class ProductsListComponent implements OnInit {
       });
     }
   
+    onSortChange(newSortBy: string) {
+      this.sortBy = newSortBy;
+      console.log('SortBy mis à jour:', this.sortBy); 
+      this.updateFilters();
+    }
+  
     toggleFavorite(pokemon: Pokemon) {
-      // Ajoute ou retire des favoris
       const index = this.favorites.indexOf(pokemon);
       if (index === -1) {
         this.favorites.push(pokemon);
       } else {
         this.favorites.splice(index, 1);
       }
+    }
+  
+    trackByFn(index: number, item: Pokemon) {
+      return item.id; 
     }
 }

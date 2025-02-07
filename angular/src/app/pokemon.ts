@@ -1,11 +1,11 @@
 export interface Pokemon {
     id: string;
-    nom: string;
+    name: string;
     numero: number;
     image: string;
     hp: number;
     attaque: number;
     type: string;
-    rareté: string;
-    prixMoyen: number;
+    rarity: string;
+    prices: number;
 }

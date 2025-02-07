@@ -1,9 +1,11 @@
-import { Component, Input, ElementRef, ViewChild, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, inject} from '@angular/core';
 import { TitleCasePipe, CommonModule } from '@angular/common';
+import { Pokemon } from '../pokemon';
+import { PokemonService } from '../pokemon-service.service';
 
 @Component({
 	selector: 'app-pokemon-card',
-    imports: [PokemonCardComponent, TitleCasePipe, CommonModule],
+    imports: [TitleCasePipe, CommonModule],
 	template: `
     <div class="card-container animate-float">
 		<div class="card w-72 sm:w-80 rounded-xl overflow-hidden">
@@ -319,13 +321,20 @@ import { TitleCasePipe, CommonModule } from '@angular/common';
         }
 		`
 })
-export class PokemonCardComponent implements OnChanges {
-	@Input() pokemon: any;
-
-	constructor() {}
-
-	ngOnChanges(changes: SimpleChanges) {
-        console.log("Pokemon reçu :", this.pokemon);
+export class PokemonCardComponent {
+    @Input() pokemon: any;
+    isFavorite: boolean = false;
+    private pokemonService = inject(PokemonService);
+  
+    ngOnInit() {
+        this.pokemonService.favorites$.subscribe(favorites => {
+          this.isFavorite = favorites.includes(this.pokemon.id);
+        });
+    }
+  
+    toggleFavorite() {
+      this.pokemonService.switchFavorite(this.pokemon);
+      this.isFavorite = !this.isFavorite;
     }
     
 }

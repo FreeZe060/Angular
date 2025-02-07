@@ -9,9 +9,9 @@ export class SortByName implements PipeTransform {
     return pokemons.sort((a, b) => {
       switch (sortSelected) {
         case 'name_asc':
-          return a.nom.localeCompare(b.nom);
+          return a.name.localeCompare(b.name);
         case 'name_desc':
-          return b.nom.localeCompare(a.nom);
+          return b.name.localeCompare(a.name);
         default:
           return 0;
       }

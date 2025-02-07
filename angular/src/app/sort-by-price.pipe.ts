@@ -9,9 +9,9 @@ export class SortByPrice implements PipeTransform {
     return pokemons.sort((a, b) => {
       switch (sortSelected) {
         case 'price_asc':
-          return a.prixMoyen - b.prixMoyen;
+          return a.prices - b.prices;
         case 'price_desc':
-          return b.prixMoyen - a.prixMoyen;
+          return b.prices - a.prices;
         default:
           return 0;
       }
