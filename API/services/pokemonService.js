@@ -8,7 +8,7 @@ const fetchAllPokemons = async () => {
         const data = await response.json();
         return data.data.map(pokemon => ({
             ...pokemon,
-            prixMoyen: pokemon.cardmarket?.prices?.averageSellPrice ?? 0 
+            prices: pokemon.cardmarket?.prices?.averageSellPrice ?? 0 
         }));
     } catch (error) {
         console.error("Erreur API:", error);

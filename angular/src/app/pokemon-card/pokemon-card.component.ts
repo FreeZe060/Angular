@@ -77,7 +77,7 @@ import { PokemonService } from '../pokemon-service.service';
 
 			<div class="mt-3 text-[10px] text-white/80 text-center italic">
 				Spits fire that is hot enough to melt boulders. Known to unintentionally cause forest fires. ©2024 Pokemon
-                {{pokemon.prixMoyen}}
+                {{pokemon.prices | currency:'EUR'}}
 			</div>
 			</div>
 		</div>

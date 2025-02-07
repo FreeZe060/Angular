@@ -9,7 +9,6 @@ import { Pokemon } from './pokemon';
 export class PokemonService {
     private apiUrl = 'http://localhost:8080/api/pokemons';  
 
-    // Ajout d'une condition pour vérifier si on est dans un environnement client (navigateur)
     private isBrowser: boolean = typeof window !== 'undefined';
 
     private favorites: number[] = this.isBrowser ? JSON.parse(localStorage.getItem('pokemonFavs') || '[]') : [];
@@ -32,6 +31,10 @@ export class PokemonService {
         return this.http.get<Pokemon[]>(`${this.apiUrl}`, { params });
     }
 
+    getTypes(): Observable<string[]> {
+        return this.http.get<string[]>(`${this.apiUrl}/types`);
+    }
+
     getPokemonById(id: string): Observable<Pokemon> {
         return this.http.get<Pokemon>(`${this.apiUrl}/${id}`);
     }
@@ -43,7 +46,6 @@ export class PokemonService {
             this.favorites.push(pokemonId);
         }
 
-        // Ne tenter de manipuler localStorage que si l'on est dans un environnement client
         if (this.isBrowser) {
             localStorage.setItem('pokemonFavs', JSON.stringify(this.favorites));
         }
@@ -72,7 +74,6 @@ export class PokemonService {
     }
 
     updateCartStorage() {
-        // Ne tenter de manipuler localStorage que si l'on est dans un environnement client
         if (this.isBrowser) {
             localStorage.setItem('pokemonCart', JSON.stringify(this.cart));
         }
