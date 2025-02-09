@@ -20,13 +20,13 @@ import { CommonModule } from '@angular/common';
               <ul class="space-y-6">
                 @for (item of cartItems; track item.pokemon.id) {
                   <li class="flex items-center gap-6 border p-6 rounded-md shadow-md">
-                    <img [src]="item.pokemon.image" alt="{{ item.pokemon.name }}" class="w-20 h-20 rounded-lg object-cover" />
+                    <img [src]="item.pokemon.images.large" alt="{{ item.pokemon.name }}" class="w-20 h-20 rounded-lg object-cover" />
                     <div>
                       <h3 class="text-lg font-semibold text-gray-900 ">{{ item.pokemon.name }}</h3>
                       <dl class="mt-2 space-y-2 text-sm text-gray-600">
                         <div>
                           <dt class="inline font-semibold">Prix : </dt>
-                          <dd class="inline">{{ item.pokemon.prices }}€</dd>
+                          <dd class="inline">{{ item.pokemon.cardmarket?.prices?.averageSellPrice }}€</dd>
                         </div>
                       </dl>
                     </div>
@@ -147,7 +147,7 @@ export class CartPageComponent implements OnInit {
 	}
 
 	calculateTotals() {
-		this.subtotal = this.cartItems.reduce((total, item) => total + item.pokemon.prices * item.quantity, 0);
+    this.subtotal = this.cartItems.reduce((total, item) => total + item.pokemon.cardmarket?.prices?.averageSellPrice * item.quantity, 0);
 		this.vat = parseFloat((this.subtotal * 0.2).toFixed(2));
 		this.discount = 0;
 		this.total = parseFloat((this.subtotal + this.vat - this.discount).toFixed(2));
