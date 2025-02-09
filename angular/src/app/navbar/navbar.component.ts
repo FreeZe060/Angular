@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, inject } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, OnInit } from '@angular/core';
 import { PokemonService } from '../pokemon-service.service';
 import { Router, NavigationEnd, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -25,7 +25,7 @@ import { CommonModule } from '@angular/common';
 					<i class="w-8 fas fa-address-card p-2 bg-gray-800 rounded-full"></i>
 					<span class="mx-1">Produits</span>
 					<span class="absolute left-0 ml-8 -mt-2 text-xs bg-gray-700 font-medium px-2 shadow-lg rounded-full">
-						{{ productCount }}
+						<!-- {{ productCount }} -->
 					</span>
 				</a>
 
@@ -47,33 +47,32 @@ import { CommonModule } from '@angular/common';
 								<div class="flex items-center justify-between mb-3">
 									<img [src]="item.pokemon.image" alt="{{ item.pokemon.name }}" class="w-12 h-12 rounded-lg" />
 									<div class="">
-									<p class="text-sm font-medium">{{ item.pokemon.name }}</p>
-									<p class="text-xs text-gray-400">{{ item.pokemon.prices | currency:'EUR' }}</p>
-									<div class="flex items-center">
-										<button (click)="updateQuantity(+item.pokemon.id, item.quantity - 1)" class="text-gray-500 hover:text-gray-300">
-										-
-										</button>
-										<span class="mx-2">{{ item.quantity }}</span>
-										<button (click)="updateQuantity(+item.pokemon.id, item.quantity + 1)" class="text-gray-500 hover:text-gray-300">
-										+
-										</button>
+										<p class="text-sm font-medium">{{ item.pokemon.name }}</p>
+										<p class="text-xs text-gray-400">{{ item.pokemon.prices | currency:'EUR' }}</p>
+										<div class="flex items-center">
+											<button (click)="updateQuantity(item.pokemon.id.toString(), -1)" class="text-gray-500 hover:text-gray-300">-</button>
+											<span class="mx-2">{{ item.quantity }}</span>
+											<button (click)="updateQuantity(item.pokemon.id.toString(), 1)" class="text-gray-500 hover:text-gray-300">+</button>
+										</div>
 									</div>
-									</div>
-									<button (click)="removeFromCart(+item.pokemon.id)" class="text-red-500 hover:underline text-xs">
-									<i class="fa-solid fa-delete-left"></i>
+									<button (click)="removeFromCart(item.pokemon.id.toString())" class="text-red-500 hover:underline text-xs">
+										<i class="fa-solid fa-delete-left"></i>
 									</button>
 								</div>
+								<div class="mt-4 text-right">
+									<a routerLink="/panier" class="bg-blue-600 px-3 py-1 text-sm rounded-lg hover:bg-blue-700 transition">
+										Voir le panier
+									</a>
+								</div>
 							}
-							<div class="mt-4 text-right">
-								<a routerLink="/panier" class="bg-blue-600 px-3 py-1 text-sm rounded-lg hover:bg-blue-700 transition">
-									Voir le panier
-								</a>
-							</div>
 						} @else {
 							<p class="text-sm text-gray-400">Votre panier est vide.</p>
 						}
 					</div>
-				}
+					}
+				<!-- } @else {
+					<p class="text-sm text-gray-400">Votre panier est vide.</p>
+				} -->
 
 
 				<span class="px-1 hover:text-white cursor-pointer transition-all duration-300">
@@ -109,32 +108,23 @@ import { CommonModule } from '@angular/common';
 	`,
 	styles: []
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnInit {
 	activeRoute: string = '/';
 	private pokemonService = inject(PokemonService);
-	productCount: number = 0;
 	favoritesCount: number = 0;
 	cartCount: number = 0;
 	cartItems = this.pokemonService.getCart();
 	isCartPopupOpen = false;
-
 	private router = inject(Router);
 	private elementRef = inject(ElementRef);
 
-	constructor() {
-		this.router.events.subscribe((event) => {
-		  if (event instanceof NavigationEnd) {
-			this.activeRoute = event.urlAfterRedirects;
-		  }
-		});
-
+	ngOnInit() {
 		this.pokemonService.favorites$.subscribe(favorites => {
-		  this.favoritesCount = favorites.length;
+			this.favoritesCount = favorites.length;
 		});
-
 		this.pokemonService.cart$.subscribe(cart => {
 			this.cartItems = cart;
-			this.cartCount = this.pokemonService.getNumberOfCartItems(); 
+			this.cartCount = this.pokemonService.getNumberOfCartItems();
 		});
 	}
 
@@ -142,33 +132,26 @@ export class NavbarComponent {
 		this.isCartPopupOpen = !this.isCartPopupOpen;
 	}
 
-	removeFromCart(id: number) {
-		this.pokemonService.removeFromCart(id);
-		this.cartItems = this.pokemonService.getCart();
-		this.cartCount = this.cartItems.length;
+	removeFromCart(pokemonId: string) {
+		this.pokemonService.removeFromCart(pokemonId); 
 	}
-
-	updateQuantity(pokemonId: number, quantity: number) {
-		if (quantity < 0) {
-		  return;
-		}
-	  
-		if (quantity === 0) {
-		  this.pokemonService.removeFromCart(pokemonId);
-		} else {
-		  this.pokemonService.getPokemons().subscribe(pokemons => {
-			const pokemon = pokemons.find(p => p.id === pokemonId.toString());  
-			if (pokemon) {
-			  this.pokemonService.addToCart(pokemon, quantity);
+	
+	updateQuantity(pokemonId: string, change: number) {
+		const item = this.cartItems.find(item => item.pokemon.id === pokemonId);
+		if (item) {
+			const newQuantity = item.quantity + change;
+			if (newQuantity < 1) {
+				this.removeFromCart(pokemonId);
+			} else {
+				this.pokemonService.updateCartQuantity(pokemonId, newQuantity);
 			}
-		  });
 		}
-	}  
+	}
+	
 
 	@HostListener('document:click', ['$event'])
 	onDocumentClick(event: MouseEvent): void {
 		const targetElement = event.target as HTMLElement;
-
 		if (this.isCartPopupOpen && !this.elementRef.nativeElement.contains(targetElement)) {
 			this.isCartPopupOpen = false;
 		}

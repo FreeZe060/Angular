@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, inject } from '@angular/core';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
@@ -10,6 +10,7 @@ import { SortByPrice } from '../sort-by-price.pipe';
 import { SortByHp } from '../sort-by-hp.pipe';
 import { SortByRarity } from '../sort-by-rarity.pipe';
 import { SortByType } from '../sort-by-type.pipe';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
     imports: [PokemonCardComponent, FormsModule, SortByName, SortByPrice, SortByHp, SortByRarity, SortByType],
@@ -23,14 +24,14 @@ import { SortByType } from '../sort-by-type.pipe';
                 <input
                     type="text"
                     [(ngModel)]="searchName"
-                    (ngModelChange)="updateFilters()"
+                    (ngModelChange)="onSearchInputChange()"
                     class="px-4 py-2 rounded-full text-black"
                     placeholder="Rechercher par nom"
                 />
                 </div>
 
                 <div class="mt-4 flex flex-wrap justify-center gap-4">
-                     <select [(ngModel)]="selectedType" (ngModelChange)="updateFilters()" class="px-4 py-2 rounded-full text-black">
+                     <select [(ngModel)]="selectedType" (ngModelChange)="applyFilters()" class="px-4 py-2 rounded-full text-black">
                         <option value="">Tous types</option>
                         <option>
                             @for(type of types; track type) {
@@ -38,7 +39,7 @@ import { SortByType } from '../sort-by-type.pipe';
                             }
                         </option>
                     </select>
-                    <select [(ngModel)]="selectedRarity" (ngModelChange)="updateFilters()" class="px-4 py-2 rounded-full text-black">
+                    <select [(ngModel)]="selectedRarity" (ngModelChange)="applyFilters()" class="px-4 py-2 rounded-full text-black">
                         <option value="">Toutes les raretés</option>
                         <option>
                             @for(rarity of allRarities; track rarity) {
@@ -47,7 +48,7 @@ import { SortByType } from '../sort-by-type.pipe';
                         </option>
                     </select>
 
-                    <select [(ngModel)]="sortBy" (ngModelChange)="updateFilters()" class="px-4 py-2 rounded-full text-black">
+                    <select [(ngModel)]="sortBy" (ngModelChange)="applyFilters()" class="px-4 py-2 rounded-full text-black">
                         <option value="name_asc">A-Z</option>
                         <option value="name_desc">Z-A</option>
                         <option value="price_asc">Prix Bas</option>
@@ -69,67 +70,157 @@ import { SortByType } from '../sort-by-type.pipe';
     providers: []
 })
 export class ProductsListComponent implements OnInit {
-    @Input() pokemon: any;
-    pokemons: Pokemon[] = [];
-    filteredPokemons: Pokemon[] = [];
-    favorites: Pokemon[] = [];
-    types: string[] = [];
-    searchName = '';
-    selectedType = '';
-    selectedRarity = '';
-    sortBy = 'name_asc';
-    allRarities: string[] = [];
+  @Input() pokemon: any;
+  pokemons: Pokemon[] = [];
+  filteredPokemons: Pokemon[] = [];
+  favorites: string[] = [];
+  searchName = '';
+  selectedType = '';
+  selectedRarity = '';
+  sortBy = 'name_asc';
+  allRarities: string[] = [];
+  showFavorites = false;
   
-    private searchTerms = new Subject<{ name: string; type: string; sortBy: string }>();
-  
-    constructor(private pokemonService: PokemonService) {}
-  
-    ngOnInit() {
-        this.searchTerms.pipe(
-          debounceTime(300),
-          distinctUntilChanged(),
-          switchMap(({ name, type, sortBy }) => this.pokemonService.getPokemons(name, type, sortBy))
-        ).subscribe((data) => {
-          if (data && Array.isArray(data)) {
-            this.pokemons = data;
-            this.filteredPokemons = [...this.pokemons];
-      
-            this.allRarities = [...new Set(data.map(pokemon => pokemon.rarity))];
-          } else {
-            console.error('Données invalides reçues', data);
-          }
-        });
-      
-        this.pokemonService.getTypes().subscribe((types) => {
-          this.types = types;
-        });
-      
-        this.updateFilters();
-    }
+  private searchTerms = new Subject<string>();
+  private activatedRoute = inject(ActivatedRoute);
+  private pokemonService = inject(PokemonService);
+  types: any;
 
-    updateFilters() {
-      this.searchTerms.next({
-        name: this.searchName,
-        type: this.selectedType,
-        sortBy: this.sortBy,
+  ngOnInit() {
+      this.pokemonService.getPokemons().subscribe((data) => {
+          if (data && Array.isArray(data)) {
+              this.pokemons = data;
+              this.applyFilters();
+          } else {
+              console.error('Données invalides reçues', data);
+          }
       });
-    }
-  
-    onSortChange(newSortBy: string) {
-      this.sortBy = newSortBy;
-      this.updateFilters();
-    }
-  
-    toggleFavorite(pokemon: Pokemon) {
-      const index = this.favorites.indexOf(pokemon);
-      if (index === -1) {
-        this.favorites.push(pokemon);
-      } else {
-        this.favorites.splice(index, 1);
+
+      this.pokemonService.getTypes().subscribe((types) => {
+          this.types = types;
+      });
+
+      this.activatedRoute.url.subscribe((urlSegments) => {
+          this.showFavorites = urlSegments.some(segment => segment.path === 'favoris');
+          this.applyFilters();
+      });
+
+      this.pokemonService.favorites$.subscribe(favorites => {
+          this.favorites = favorites;
+          this.applyFilters();
+      });
+
+      this.searchTerms.pipe(
+        debounceTime(300),
+        distinctUntilChanged()
+      ).subscribe(() => {
+          this.applyFilters();
+      });
+  }
+
+  onSearchInputChange() {
+    this.searchTerms.next(this.searchName);
+  }
+
+  applyFilters() {
+      if (!this.pokemons.length) return;
+
+      this.filteredPokemons = [...this.pokemons];
+
+      if (this.showFavorites) {
+        this.filteredPokemons = this.filteredPokemons.filter(pokemon =>
+            this.pokemonService.isPokemonFavorite(pokemon.id)
+        );
       }
-    }
-  
-    trackByFn(index: number, item: Pokemon) {
-      return item.id; 
-    }
+
+      // ✅ Appliquer le filtre de recherche
+      if (this.searchName) {
+          this.filteredPokemons = this.filteredPokemons.filter(pokemon =>
+              pokemon.name.toLowerCase().includes(this.searchName.toLowerCase())
+          );
+      }
+  }
+
+  toggleFavorite(pokemon: Pokemon) {
+      this.pokemonService.switchFavorite(pokemon);
+  }
+
+  trackByFn(index: number, item: Pokemon) {
+      return item.id;
+  }
 }
+
+
+// export class ProductsListComponent implements OnInit {
+//   pokemons: Pokemon[] = [];
+//   filteredPokemons: Pokemon[] = [];
+//   searchName = '';
+//   selectedType = '';
+//   selectedRarity = '';
+//   sortBy = 'name_asc';
+//   showFavorites = false;
+  
+//   private searchTerms = new Subject<string>();
+//   private activatedRoute = inject(ActivatedRoute);
+//   private pokemonService = inject(PokemonService);
+//   types: any;
+// allRarities: any;
+
+//   ngOnInit() {
+//       this.pokemonService.getPokemons().subscribe((data) => {
+//           if (data && Array.isArray(data)) {
+//               this.pokemons = data;
+//               this.applyFilters();
+//           } else {
+//               console.error('Données invalides reçues', data);
+//           }
+//       });
+
+//       this.pokemonService.getTypes().subscribe((types) => {
+//           this.types = types;
+//       });
+
+//       this.activatedRoute.url.subscribe((urlSegments) => {
+//           this.showFavorites = urlSegments.some(segment => segment.path === 'favoris');
+//           this.applyFilters();
+//       });
+
+//       this.searchTerms.pipe(
+//         debounceTime(300),
+//         distinctUntilChanged()
+//       ).subscribe(() => {
+//           this.applyFilters();
+//       });
+//   }
+
+//   onSearchInputChange() {
+//     this.searchTerms.next(this.searchName);
+//   }
+
+//   applyFilters() {
+//       if (!this.pokemons.length) return;
+
+//       this.filteredPokemons = [...this.pokemons];
+
+//       if (this.showFavorites) {
+//           this.filteredPokemons = this.filteredPokemons.filter(pokemon =>
+//               this.pokemonService.isPokemonFavorite(pokemon.id)
+//           );
+//       }
+
+//       if (this.searchName) {
+//           this.filteredPokemons = this.filteredPokemons.filter(pokemon =>
+//               pokemon.name.toLowerCase().includes(this.searchName.toLowerCase())
+//           );
+//       }
+//   }
+
+//   toggleFavorite(pokemon: Pokemon) {
+//       this.pokemonService.switchFavorite(pokemon);
+//   }
+
+//   trackByFn(index: number, item: Pokemon) {
+//       return item.id;
+//   }
+// }
+

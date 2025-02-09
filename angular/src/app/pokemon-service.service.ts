@@ -11,16 +11,26 @@ export class PokemonService {
 
     private isBrowser: boolean = typeof window !== 'undefined';
 
-    private favorites: number[] = this.isBrowser ? JSON.parse(localStorage.getItem('pokemonFavs') || '[]') : [];
-    private cart: { pokemon: Pokemon, quantity: number }[] = this.isBrowser ? JSON.parse(localStorage.getItem('pokemonCart') || '[]') : [];
+    private pokemons: Pokemon[] = [];
+    private pokemonsSubject = new BehaviorSubject<Pokemon[]>([]);
+    pokemons$ = this.pokemonsSubject.asObservable();
 
-    private favoritesSubject = new BehaviorSubject<number[]>(this.favorites);
+    private favorites: string[] = [];  
+    private favoritesSubject = new BehaviorSubject<string[]>([]);
     favorites$ = this.favoritesSubject.asObservable();
 
-    private cartSubject = new BehaviorSubject<{ pokemon: Pokemon, quantity: number }[]>(this.cart);
+    private favoritesCountSubject = new BehaviorSubject<number>(0);
+    favoritesCount$ = this.favoritesCountSubject.asObservable();
+    
+
+    private cart: { pokemon: Pokemon, quantity: number }[] = [];
+    private cartSubject = new BehaviorSubject<{ pokemon: Pokemon, quantity: number }[]>([]);
     cart$ = this.cartSubject.asObservable();
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) { 
+        this.loadFavoritesFromStorage();
+        this.loadCartFromStorage();
+    }
 
     getPokemons(name?: string, type?: string, sortBy?: string): Observable<Pokemon[]> {
         let params = new HttpParams();
@@ -39,22 +49,39 @@ export class PokemonService {
         return this.http.get<Pokemon>(`${this.apiUrl}/${id}`);
     }
 
-    switchFavorite(pokemonId: number) {
-        if (this.favorites.includes(pokemonId)) {
-            this.favorites = this.favorites.filter(id => id !== pokemonId);
+    private loadFavoritesFromStorage() {
+        if (typeof window !== 'undefined' && localStorage) {
+            this.favorites = JSON.parse(localStorage.getItem('pokemonFavs') || '[]'); 
+            this.favoritesSubject.next([...this.favorites]); 
+            this.favoritesCountSubject.next(this.favorites.length);
+        }
+    }
+    
+    switchFavorite(pokemon: Pokemon) {
+        const index = this.favorites.indexOf(pokemon.id.toString());
+        if (index !== -1) {
+            this.favorites.splice(index, 1);
         } else {
-            this.favorites.push(pokemonId);
+            this.favorites.push(pokemon.id.toString());
         }
 
-        if (this.isBrowser) {
-            localStorage.setItem('pokemonFavs', JSON.stringify(this.favorites));
-        }
-
-        this.favoritesSubject.next(this.favorites);
+        this.favoritesSubject.next([...this.favorites]); 
+        this.favoritesCountSubject.next(this.favorites.length);
+        localStorage.setItem('pokemonFavs', JSON.stringify(this.favorites));
+        this.favoritesSubject.next([...this.favorites]);
     }
 
-    getFavorites(): number[] {
-        return this.favorites;
+    private loadCartFromStorage() {
+        if (typeof window !== 'undefined' && localStorage) {
+            const storedCart = JSON.parse(localStorage.getItem('pokemonCart') || '[]');
+            this.cart = storedCart;
+            this.cartSubject.next(this.cart);
+        }
+    }
+
+    isPokemonFavorite(pokemonId: string): boolean {
+        const storedFavorites = JSON.parse(localStorage.getItem('pokemonFavs') || '[]');
+        return storedFavorites.includes(pokemonId);
     }
 
     addToCart(pokemon: Pokemon, quantity: number = 1) {
@@ -68,16 +95,29 @@ export class PokemonService {
         this.updateCartStorage();
     }
 
-    removeFromCart(pokemonId: number) {
-        this.cart = this.cart.filter(item => item.pokemon.id !== pokemonId.toString());
+    removeFromCart(pokemonId: string) {
+        this.cart = this.cart.filter(item => item.pokemon.id !== pokemonId); // Comparaison correcte
         this.updateCartStorage();
     }
+    
+    updateCartQuantity(pokemonId: string, quantity: number) {
+        const existingItem = this.cart.find(item => item.pokemon.id === pokemonId);
+        if (existingItem) {
+            existingItem.quantity = quantity;
+        }
+        this.updateCartStorage();
+    }
+    
 
     updateCartStorage() {
         if (this.isBrowser) {
             localStorage.setItem('pokemonCart', JSON.stringify(this.cart));
         }
         this.cartSubject.next(this.cart);
+    }
+
+    getFavorites(pokemons: Pokemon[]): Pokemon[] {
+        return pokemons.filter(pokemon => this.favorites.includes(pokemon.id.toString()));
     }
 
     getCart() {

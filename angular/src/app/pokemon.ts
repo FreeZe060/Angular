@@ -7,5 +7,6 @@ export interface Pokemon {
     attaque: number;
     type: string;
     rarity: string;
+    isFavorite: boolean;
     prices: number;
 }

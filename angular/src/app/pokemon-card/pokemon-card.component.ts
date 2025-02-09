@@ -22,6 +22,11 @@ import { PokemonService } from '../pokemon-service.service';
                 <button (click)="toggleFavorite()" class="text-white">
                     <i class="fa" [ngClass]="isFavorite ? 'fa-heart' : 'fa-heart-o'"></i>
                 </button>
+                <div class="bg-white/90 backdrop-blur rounded-lg p-3">
+                <!-- <div class="flex justify-between items-center">
+                    <button (click)="addToCart()" class="bg-blue-500 text-white px-3 py-1 rounded">Ajouter au panier</button>
+                </div> -->
+            </div>
 			</div>
 
 			<div class="relative aspect-square mb-3 rounded-lg overflow-hidden">
@@ -77,6 +82,21 @@ import { PokemonService } from '../pokemon-service.service';
                 </div>
             </div>
 
+            <div class="bg-white/90 backdrop-blur rounded-lg p-3">
+                <div class="flex justify-between items-center">
+                    @if (quantityInCart > 0) {
+                        <!-- Afficher + et - si déjà ajouté -->
+                        <div class="flex items-center gap-2">
+                            <button (click)="updateQuantity(-1)" class="bg-gray-300 text-black px-2 py-1 rounded">-</button>
+                            <span class="font-bold">{{ quantityInCart }}</span>
+                            <button (click)="updateQuantity(1)" class="bg-blue-500 text-white px-2 py-1 rounded">+</button>
+                        </div>
+                    } @else {
+                        <!-- Bouton d'ajout -->
+                        <button (click)="addToCart()" class="bg-blue-500 text-white px-3 py-1 rounded">Ajouter au panier</button>
+                    }
+                </div>
+            </div>
 
 			<div class="mt-3 text-[10px] text-white/80 text-center italic">
 				Spits fire that is hot enough to melt boulders. Known to unintentionally cause forest fires. ©2024 Pokemon
@@ -324,20 +344,76 @@ import { PokemonService } from '../pokemon-service.service';
 		`
 })
 export class PokemonCardComponent {
-    @Input() pokemon: any;
-    isFavorite: boolean = false;
-    private pokemonService = inject(PokemonService);
-  
+	@Input() pokemon: any;
+    quantityInCart: number = 0;
+	private pokemonService = inject(PokemonService);
+
     ngOnInit() {
-        this.pokemonService.favorites$.subscribe(favorites => {
-          this.isFavorite = favorites.includes(this.pokemon.id);
-        });
-    }
-  
-    toggleFavorite() {
-      this.pokemonService.switchFavorite(this.pokemon);
-      this.isFavorite = !this.isFavorite;
-      console.log('Favoris mis à jour:', this.isFavorite);
-    }
-    
+
+		this.pokemonService.cart$.subscribe(cart => {
+			const item = cart.find(item => item.pokemon.id === this.pokemon.id);
+			this.quantityInCart = item ? item.quantity : 0;
+		});
+	}
+
+	get isFavorite(): boolean {
+		return this.pokemonService.isPokemonFavorite(this.pokemon.id);
+	}
+
+	toggleFavorite() {
+		this.pokemonService.switchFavorite(this.pokemon);
+	}
+
+	addToCart() {
+		this.pokemonService.addToCart(this.pokemon, 1);
+	}
+
+	updateQuantity(change: number) {
+		const newQuantity = this.quantityInCart + change;
+		if (newQuantity < 1) {
+			this.pokemonService.removeFromCart(this.pokemon.id);
+		} else {
+			this.pokemonService.updateCartQuantity(this.pokemon.id, newQuantity);
+		}
+	}
 }
+
+// export class PokemonCardComponent {
+// 	@Input() pokemon: any;
+// 	isFavorite: boolean = false;
+// 	quantityInCart: number = 0;
+// 	private pokemonService = inject(PokemonService);
+
+// 	ngOnInit() {
+// 		this.pokemonService.favorites$.subscribe(favorites => {
+// 			this.isFavorite = favorites.includes(this.pokemon.id.toString());
+// 		});
+
+// 		this.pokemonService.cart$.subscribe(cart => {
+// 			const item = cart.find(item => item.pokemon.id === this.pokemon.id);
+// 			this.quantityInCart = item ? item.quantity : 0;
+// 		});
+// 	}
+
+// 	isPokemonFavorite(): boolean {
+// 		return this.pokemonService.isPokemonFavorite(this.pokemon.id);
+// 	}
+
+// 	toggleFavorite() {
+// 		this.pokemonService.switchFavorite(this.pokemon);
+// 		this.isFavorite = this.isPokemonFavorite(); // ✅ Mise à jour immédiate
+// 	}
+
+// 	addToCart() {
+// 		this.pokemonService.addToCart(this.pokemon, 1);
+// 	}
+
+// 	updateQuantity(change: number) {
+// 		const newQuantity = this.quantityInCart + change;
+// 		if (newQuantity < 1) {
+// 			this.pokemonService.removeFromCart(this.pokemon.id);
+// 		} else {
+// 			this.pokemonService.updateCartQuantity(this.pokemon.id, newQuantity);
+// 		}
+// 	}
+// }
