@@ -7,19 +7,8 @@ import { Pokemon } from './pokemon';
 export class SortByPrice implements PipeTransform {
 	transform(pokemons: Pokemon[], sortSelected: string): Pokemon[] {
 		return pokemons.sort((a, b) => {
-			let priceA: number, priceB: number;
-
-			if (a.tcgplayer?.prices?.normal) {
-				priceA = a.tcgplayer.prices.normal.low;
-			} else {
-				priceA = 0;
-			}
-
-			if (b.tcgplayer?.prices?.normal) {
-				priceB = b.tcgplayer.prices.normal.low;
-			} else {
-				priceB = 0;
-			}
+			const priceA = a.cardmarket?.prices?.averageSellPrice ?? 0;
+			const priceB = b.cardmarket?.prices?.averageSellPrice ?? 0;
 
 			switch (sortSelected) {
 				case 'price_asc':

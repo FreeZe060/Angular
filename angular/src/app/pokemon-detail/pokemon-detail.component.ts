@@ -1,6 +1,6 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { Pokemon } from '../pokemon';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PokemonService } from '../pokemon-service.service';
 import { DatePipe, CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -187,62 +187,77 @@ import { Subscription } from 'rxjs';
 	]
 })
 export class PokemonDetailComponent implements OnInit, OnDestroy {
-	pokemon: any = {};  // Initialisation de pokemon avec un objet vide
+	pokemon: any = null;
 	evolutionId: string | null = null;
+	errorMessage: string | null = null;
 	private routeSub: Subscription | undefined;
 
 	constructor(
 		private route: ActivatedRoute,
+		private router: Router,
 		private pokemonService: PokemonService,
 		private http: HttpClient
 	) { }
 
 	ngOnInit(): void {
-		// Observer les changements de paramètres dans l'URL
 		this.routeSub = this.route.params.subscribe(params => {
-			const id = params['id'];  // Récupère l'id de l'URL
+			const id = params['id'];
 			if (id) {
-				this.loadPokemon(id);  // Charge les données du Pokémon
+				this.loadPokemon(id);
 			}
 		});
 	}
 
 	ngOnDestroy(): void {
 		if (this.routeSub) {
-			this.routeSub.unsubscribe();  // Nettoyer la souscription lors de la destruction du composant
+			this.routeSub.unsubscribe();
 		}
 	}
 
-	// Méthode pour charger le Pokémon et ses évolutions
 	private loadPokemon(id: string): void {
-		this.pokemonService.getPokemonById(id).subscribe(pokemon => {
-			this.pokemon = pokemon;
+		this.pokemonService.getPokemonById(id).subscribe(
+			pokemon => {
+				if (!pokemon) {
+					this.handleInvalidId();
+					return;
+				}
 
-			// S'assurer que evolvesTo est un tableau
-			if (!Array.isArray(this.pokemon.evolvesTo)) {
-				this.pokemon.evolvesTo = [];
-			}
+				this.pokemon = pokemon;
+				this.errorMessage = null;
 
-			// Vérification si Pokémon a une évolution
-			if (this.pokemon.evolvesTo.length > 0) {
-				this.fetchEvolutionId(this.pokemon.evolvesTo[0]).then(id => {
-					this.evolutionId = id;
-				});
+				if (!Array.isArray(this.pokemon.evolvesTo)) {
+					this.pokemon.evolvesTo = [];
+				}
+
+				if (this.pokemon.evolvesTo.length > 0) {
+					this.fetchEvolutionId(this.pokemon.evolvesTo[0]).then(id => {
+						this.evolutionId = id;
+					});
+				}
+			},
+			() => {
+				this.handleInvalidId();
 			}
-		});
+		);
 	}
 
-	// Fonction pour récupérer l'id de l'évolution via le nom
 	private fetchEvolutionId(evolutionName: string): Promise<string | null> {
 		const url = `https://api.pokemontcg.io/v2/cards?q=name:${evolutionName}`;
 		return this.http.get<any>(url).toPromise().then(data => {
 			if (data.data.length > 0) {
-				return data.data[0].id;  // Retourne l'ID de l'évolution trouvée
+				return data.data[0].id;
 			}
-			return null;  // Retourne null si aucune évolution n'est trouvée
+			return null;
 		}).catch(() => {
-			return null;  // En cas d'erreur, on retourne null
+			return null;
 		});
 	}
-}
 
+	private handleInvalidId(): void {
+		this.pokemon = null;
+		this.errorMessage = "Aucun Pokémon trouvé avec cet ID.";
+		setTimeout(() => {
+			this.router.navigate(['/']);
+		}, 1000);
+	}
+}

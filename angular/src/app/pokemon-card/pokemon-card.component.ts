@@ -232,7 +232,7 @@ import { RouterLink } from '@angular/router';
         }
 
         /* Type Acier */
-        .type-steel {
+        .type-metal {
             background: linear-gradient(45deg, #b0c4de, #4682b4);
             
         }
@@ -268,7 +268,7 @@ import { RouterLink } from '@angular/router';
         }
 
         /* Type Ténèbres */
-        .type-evil {
+        .type-darkness {
             background: linear-gradient(45deg, #000000, #2f4f4f);
             
         }
@@ -368,7 +368,7 @@ export class PokemonCardComponent {
             fire: 'from-orange-400 via-amber-500 to-red-500',
             water: 'from-blue-400 via-blue-500 to-cyan-500',
             grass: 'from-green-400 via-lime-500 to-green-600',
-            electric: 'from-yellow-300 via-yellow-500 to-orange-500',
+            lightning: 'from-yellow-300 via-yellow-500 to-yellow-600',
             ice: 'from-blue-300 via-teal-400 to-cyan-500',
             psychic: 'from-pink-400 via-purple-500 to-pink-600',
             dark: 'from-gray-800 via-gray-900 to-black',
