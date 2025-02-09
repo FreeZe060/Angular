@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { PokemonService } from '../pokemon-service.service';
+import { Pokemon } from '../pokemon';
 import { Router, NavigationEnd, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
@@ -113,7 +115,7 @@ import Swal from 'sweetalert2';
 
 export class CheckoutPageComponent {
 
-	constructor(private router: Router) { }
+  constructor(private router: Router, private pokemonService: PokemonService) {}
 
 	formatCardNumber(event: any): void {
 		let value = event.target.value.replace(/\D/g, '');
@@ -157,18 +159,20 @@ export class CheckoutPageComponent {
 	}
 
   onSubmit(event: Event) {
-    event.preventDefault(); // Empêche le rechargement de la page
+    event.preventDefault();
 
-    // Afficher une alerte SweetAlert2
     Swal.fire({
       title: 'Succès !',
       text: 'Votre formulaire a été soumis avec succès.',
       icon: 'success',
       confirmButtonText: 'OK'
     }).then(() => {
-      // Redirection vers la page d'accueil après la confirmation
+      this.resetCart();
       this.router.navigate(['/']);
     });
+  }
+  resetCart() {
+    this.pokemonService.clearCart();  
   }
 
 }

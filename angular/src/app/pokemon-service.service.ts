@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap, map } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { Observable, throwError, BehaviorSubject, tap, map } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { Pokemon } from './pokemon';
 
 @Injectable({
@@ -87,6 +88,14 @@ export class PokemonService {
         this.favoritesSubject.next([...this.favorites]);
     }
 
+    private handleError(error: HttpErrorResponse) {
+        if (error.status === 404) {
+            return throwError(() => new Error("Ce Pokémon n'existe pas."));
+        } else {
+            return throwError(() => new Error("Une erreur est survenue."));
+        }
+    }
+
     private loadCartFromStorage() {
         if (typeof window !== 'undefined' && localStorage) {
             const storedCart = JSON.parse(localStorage.getItem('pokemonCart') || '[]');
@@ -94,6 +103,12 @@ export class PokemonService {
             this.cartSubject.next(this.cart);
         }
     }
+
+    clearCart() {
+        localStorage.removeItem('pokemonCart');  
+        this.cart = []; 
+        this.cartSubject.next(this.cart); 
+    }    
 
     isPokemonFavorite(pokemonId: string): boolean {
         if (typeof window === 'undefined') return false;
@@ -124,7 +139,6 @@ export class PokemonService {
         }
         this.updateCartStorage();
     }
-    
 
     updateCartStorage() {
         if (this.isBrowser) {

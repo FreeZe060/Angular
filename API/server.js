@@ -49,8 +49,19 @@ app.use('/static', express.static(path.join(__dirname, 'static')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+
 // Utiliser l'API
 app.use('/api/pokemons', routes);
+
+app.use((req, res, next) => {
+    res.status(404).json({ error: "Page non trouvée" });
+});
+
+app.use((err, req, res, next) => {
+    console.error("Erreur serveur:", err);
+    res.status(500).json({ error: "Erreur interne du serveur" });
+});
+
 
 app.listen(port, () => {
     console.log(`Serveur marche sur le port ${port} avec Express server : http://localhost:${port}`);
