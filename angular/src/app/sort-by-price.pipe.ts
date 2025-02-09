@@ -2,19 +2,34 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { Pokemon } from './pokemon';
 
 @Pipe({
-  name: 'sortByPrice'
+	name: 'sortByPrice'
 })
 export class SortByPrice implements PipeTransform {
-  transform(pokemons: Pokemon[], sortSelected: string): Pokemon[] {
-    return pokemons.sort((a, b) => {
-      switch (sortSelected) {
-        case 'price_asc':
-          return a.prices - b.prices;
-        case 'price_desc':
-          return b.prices - a.prices;
-        default:
-          return 0;
-      }
-    });
-  }
+	transform(pokemons: Pokemon[], sortSelected: string): Pokemon[] {
+		return pokemons.sort((a, b) => {
+			let priceA: number, priceB: number;
+
+			// Vérification de l'existence de prix sur TCGPlayer
+			if (a.tcgplayer?.prices?.normal) {
+				priceA = a.tcgplayer.prices.normal.low;
+			} else {
+				priceA = 0;
+			}
+
+			if (b.tcgplayer?.prices?.normal) {
+				priceB = b.tcgplayer.prices.normal.low;
+			} else {
+				priceB = 0;
+			}
+
+			switch (sortSelected) {
+				case 'price_asc':
+					return priceA - priceB;
+				case 'price_desc':
+					return priceB - priceA;
+				default:
+					return 0;
+			}
+		});
+	}
 }

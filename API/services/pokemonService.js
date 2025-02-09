@@ -1,4 +1,4 @@
-const POKEMON_API_URL = "https://api.pokemontcg.io/v2/cards?q=nationalPokedexNumbers:[1%20TO%20151]&pageSize=10";
+const POKEMON_API_URL = "https://api.pokemontcg.io/v2/cards?q=nationalPokedexNumbers:[1%20TO%20151]&pageSize=4";
 
 const fetchAllPokemons = async () => {
     try {
@@ -15,7 +15,6 @@ const fetchAllPokemons = async () => {
         return []; 
     }
 };
-
 
 const fetchPokemonById = async (id) => {
     const response = await fetch(`https://api.pokemontcg.io/v2/cards/${id}`);

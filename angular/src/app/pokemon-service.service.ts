@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, tap } from 'rxjs';
 import { Pokemon } from './pokemon';
 
 @Injectable({
@@ -11,16 +11,28 @@ export class PokemonService {
 
     private isBrowser: boolean = typeof window !== 'undefined';
 
-    private favorites: number[] = this.isBrowser ? JSON.parse(localStorage.getItem('pokemonFavs') || '[]') : [];
-    private cart: { pokemon: Pokemon, quantity: number }[] = this.isBrowser ? JSON.parse(localStorage.getItem('pokemonCart') || '[]') : [];
+    private pokemons: Pokemon[] = [];
+    private pokemonsSubject = new BehaviorSubject<Pokemon[]>([]);
+    pokemons$ = this.pokemonsSubject.asObservable();
 
-    private favoritesSubject = new BehaviorSubject<number[]>(this.favorites);
+    private pokemonsCountSubject = new BehaviorSubject<number>(0);
+    pokemonsCount$ = this.pokemonsCountSubject.asObservable();
+
+    private favorites: number[] = [];
+    private favoritesSubject = new BehaviorSubject<number[]>([]);
     favorites$ = this.favoritesSubject.asObservable();
 
-    private cartSubject = new BehaviorSubject<{ pokemon: Pokemon, quantity: number }[]>(this.cart);
+    private favoritesCountSubject = new BehaviorSubject<number>(0);
+    favoritesCount$ = this.favoritesCountSubject.asObservable();
+
+    private cart: { pokemon: Pokemon, quantity: number }[] = [];
+    private cartSubject = new BehaviorSubject<{ pokemon: Pokemon, quantity: number }[]>([]);
     cart$ = this.cartSubject.asObservable();
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) { 
+        this.loadFavoritesFromStorage();
+        this.loadCartFromStorage();
+    }
 
     getPokemons(name?: string, type?: string, sortBy?: string): Observable<Pokemon[]> {
         let params = new HttpParams();
@@ -28,33 +40,60 @@ export class PokemonService {
         if (type) params = params.set('type', type);
         if (sortBy) params = params.set('sortBy', sortBy);
 
-        return this.http.get<Pokemon[]>(`${this.apiUrl}`, { params });
+        return this.http.get<Pokemon[]>(`${this.apiUrl}`, { params }).pipe(
+            tap(pokemons => {
+                this.pokemons = pokemons;
+                this.pokemonsSubject.next(this.pokemons);
+                this.pokemonsCountSubject.next(pokemons.length);
+            })
+        );
     }
 
     getTypes(): Observable<string[]> {
         return this.http.get<string[]>(`${this.apiUrl}/types`);
     }
 
+    getNumberOfPokemons(): number {
+        return this.pokemons.length;
+    }
+
     getPokemonById(id: string): Observable<Pokemon> {
         return this.http.get<Pokemon>(`${this.apiUrl}/${id}`);
     }
 
-    switchFavorite(pokemonId: number) {
-        if (this.favorites.includes(pokemonId)) {
-            this.favorites = this.favorites.filter(id => id !== pokemonId);
-        } else {
-            this.favorites.push(pokemonId);
+    private loadFavoritesFromStorage() {
+        if (typeof window !== 'undefined' && localStorage) {
+            this.favorites = JSON.parse(localStorage.getItem('pokemonFavs') || '[]');
+            this.favoritesSubject.next(this.favorites);
+            this.favoritesCountSubject.next(this.favorites.length);
         }
-
-        if (this.isBrowser) {
-            localStorage.setItem('pokemonFavs', JSON.stringify(this.favorites));
-        }
-
-        this.favoritesSubject.next(this.favorites);
     }
 
-    getFavorites(): number[] {
-        return this.favorites;
+    switchFavorite(pokemon: Pokemon) {}
+
+    // switchFavorite(pokemon: Pokemon) {
+    //     if (pokemon.isFavorite) {
+    //         this.favorites = this.favorites.filter(id => id !== pokemon.id);
+    //     } else {
+    //         this.favorites.push(pokemon.id);
+    //     }
+        
+    //     pokemon.isFavorite = !pokemon.isFavorite;
+    //     this.pokemonsSubject.next(this.pokemons);
+    //     this.favoritesSubject.next(this.favorites);
+    //     this.favoritesCountSubject.next(this.favorites.length);
+
+    //     if (typeof window !== 'undefined' && localStorage) {
+    //         localStorage.setItem('pokemonFavs', JSON.stringify(this.favorites));
+    //     }
+    // }
+
+    private loadCartFromStorage() {
+        if (typeof window !== 'undefined' && localStorage) {
+            const storedCart = JSON.parse(localStorage.getItem('pokemonCart') || '[]');
+            this.cart = storedCart;
+            this.cartSubject.next(this.cart);
+        }
     }
 
     addToCart(pokemon: Pokemon, quantity: number = 1) {

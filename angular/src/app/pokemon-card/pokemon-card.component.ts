@@ -1,31 +1,35 @@
-import { Component, Input, OnChanges, inject} from '@angular/core';
+import { Component, Input, OnChanges, inject } from '@angular/core';
 import { TitleCasePipe, CommonModule } from '@angular/common';
-import { Pokemon } from '../pokemon';
 import { PokemonService } from '../pokemon-service.service';
+import { RouterLink } from '@angular/router';
 
 @Component({
-	selector: 'app-pokemon-card',
-    imports: [TitleCasePipe, CommonModule],
-	template: `
-    <div class="card-container animate-float">
-		<div class="card w-72 sm:w-80 rounded-xl overflow-hidden">
+    selector: 'app-pokemon-card',
+    imports: [TitleCasePipe, CommonModule, RouterLink],
+    template: `
+    <div class="card-container animate-float" id={{pokemon.id}}>
+		<div class="card w-72 sm:w-[22rem] rounded-xl overflow-hidden">
 			<div class="glow-effect"></div>
 			<div class="rainbow-border"></div>
-			<div class="relative bg-gradient-to-br from-orange-400 via-amber-500 to-rose-500 p-3 rounded-xl">
+			<div class="relative bg-gradient-to-br p-3 rounded-xl" [ngClass]="getGradient()">
 			<div class="shine-lines"></div>
 			<div class="flex justify-between items-start mb-2">
 				<h2 class="text-lg font-bold text-white">{{pokemon.name}}</h2>
-				<div class="flex items-center gap-1">
-				<span class="text-white font-bold">HP</span>
-				<span class="text-white font-bold">{{pokemon.hp}}</span>
-				</div>
                 <button (click)="toggleFavorite()" class="text-white">
                     <i class="fa" [ngClass]="isFavorite ? 'fa-heart' : 'fa-heart-o'"></i>
                 </button>
+                <a [routerLink]="['/pokemon', pokemon.id]" class="cursor-pointer text-white">
+                    <i class="fa-solid fa-circle-info"></i>
+                </a>
+				<div class="flex items-center gap-1">
+                    <div class="w-4 h-4 rounded-full bg-gradient-to-br animate-pulse-glow" [ngClass]="getGradient()"></div>
+                    <span class="text-white font-bold">HP</span>
+                    <span class="text-white font-bold">{{pokemon.hp}}</span>
+				</div>
 			</div>
 
 			<div class="relative aspect-square mb-3 rounded-lg overflow-hidden">
-				<div class="absolute inset-0 bg-gradient-to-br from-orange-200 to-rose-200"></div>
+				<div class="absolute inset-0 bg-gradient-to-br " [ngClass]="getGradient()"></div>
 				<div class="absolute inset-0 holo-effect animate-holo-glow"></div>
 				<div class="absolute inset-0 card-shine"></div>
 				<div class="absolute inset-0 sparkles"></div>
@@ -39,39 +43,48 @@ import { PokemonService } from '../pokemon-service.service';
                 <div class="flex items-center gap-2">
                     <div>
                         @for(type of pokemon.types; track type) {
-                            <span [ngClass]="'type-' + type" class=" text-xs px-2 py-1 rounded-full">{{ type | titlecase }}</span>
+                            <span [ngClass]="'type-' + type.toLowerCase()" class=" text-xs text-white px-2 py-1 rounded-full">{{ type | titlecase }}</span>
                         }
                     </div>
-                    <span class="text-xs text-neutral-600">Stage 2</span>
+                    <span class="text-xs text-neutral-600">{{pokemon.subtypes}}</span>
                 </div>
 
                 <div class="space-y-2">
-                    @if(pokemon.attacks[0]) {
-                        <div class="flex items-start gap-2 min-h-[120px]"> 
-                            <div class="flex gap-1">
-                                <div class="w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-red-500 animate-pulse-glow"></div>
-                                <div class="w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-red-500 animate-pulse-glow"></div>
+                    @for(attack of pokemon.attacks; track attack) {
+                        <div class="flex items-start gap-2 "> 
+                            <div class="grid grid-cols-2 gap-1 justify-center w-fit">
+                                <div *ngFor="let cost of attack.cost; let i = index" [ngClass]="'type-' + cost.toLowerCase()" class="w-4 h-4 rounded-full animate-pulse-glow"></div>
                             </div>
                             <div class="flex-1 flex flex-col justify-center"> 
-                                <h3 class="font-bold text-sm">{{ pokemon.attacks[0].name }}</h3>
-                                <p class="text-xs text-neutral-600">{{ pokemon.attacks[0].text }}</p>
+                                <h3 class="font-bold text-sm">{{ attack.name }}</h3>
+                                <p class="text-xs text-neutral-600">{{ attack.text }}</p>
                             </div>
-                            <span class="font-bold ml-auto self-center">{{ pokemon.attacks[0].damage || 'N/A' }}</span> 
+                            <span class="font-bold ">{{ attack.damage || '' }}</span> 
                         </div>
                     }
 
-                    <div class="flex items-center justify-between text-xs pt-2 border-t border-neutral-200">
+                    <div class="flex *:flex *:flex-col justify-between text-xs pt-2 border-t border-neutral-200">
                         <div>
-                            <span class="text-neutral-600">Weakness</span>
-                            <span class="ml-1 type-fire text-white px-2 py-0.5 rounded-full">Water</span>
+                            <span class="text-neutral-600 text-center">Weakness</span>
+                            @if(pokemon.weaknesses != null) {
+                                @for(type of pokemon.weaknesses; track type) {
+                                    <span [ngClass]="'type-' + type.type.toLowerCase()" class="ml-1 text-white px-2 py-0.5 rounded-full">{{ type.type | titlecase }} {{ type.value }}</span>
+                                }
+                            }
                         </div>
                         <div>
-                            <span class="text-neutral-600">Resistance</span>
-                            <span class="ml-1 bg-neutral-200 px-2 py-0.5 rounded-full">-30</span>
+                            <span class="text-neutral-600 text-center">Resistance</span>
+                            @if(pokemon.resistances != null) {
+                                <span *ngFor="let type of pokemon.resistances; let i = index" [ngClass]="'type-' + type.type.toLowerCase()" class="ml-1 text-white px-2 py-0.5 rounded-full">{{ type.type | titlecase }} {{ type.value }}</span>
+                            }   
                         </div>
                         <div>
-                            <span class="text-neutral-600">Retreat Cost</span>
-                            <span class="ml-1 bg-neutral-800 text-white px-2 py-0.5 rounded-full">3</span>
+                            <span class="text-neutral-600 text-center">Retreat Cost</span>
+                            @if(pokemon.retreatCost != null) {
+                                <div class="flex ml-1 px-2 py-0.5">
+                                    <div *ngFor="let cost of pokemon.retreatCost; let i = index" [ngClass]="'type-' + cost.toLowerCase()" class="w-4 h-4 rounded-full ml-1 px-2 py-0.5 animate-pulse-glow"></div>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -79,14 +92,14 @@ import { PokemonService } from '../pokemon-service.service';
 
 
 			<div class="mt-3 text-[10px] text-white/80 text-center italic">
-				Spits fire that is hot enough to melt boulders. Known to unintentionally cause forest fires. ©2024 Pokemon
+				{{pokemon.flavorText}}
                 {{pokemon.prices | currency:'EUR'}}
 			</div>
 			</div>
 		</div>
 	</div>
   `,
-	styles: `
+    styles: `
 	.card-container {
             perspective: 1000px;
             transform-style: preserve-3d;
@@ -152,103 +165,103 @@ import { PokemonService } from '../pokemon-service.service';
 
         .type-fire {
             background: linear-gradient(45deg, #ff8a00, #e52e71);
-            animation: rainbow 6s linear infinite;
+            
         }
 
         /* Type Eau */
         .type-water {
             background: linear-gradient(45deg, #00bfff, #1e90ff);
-            animation: rainbow 6s linear infinite;
+            
         }
 
         /* Type Plante */
         .type-grass {
             background: linear-gradient(45deg, #2e8b57, #228b22);
-            animation: rainbow 6s linear infinite;
+            
         }
 
         /* Type Électrique */
-        .type-electric {
+        .type-lightning {
             background: linear-gradient(45deg, #f7df1e, #ffcc00);
-            animation: rainbow 6s linear infinite;
+            
         }
 
         /* Type Glace */
         .type-ice {
             background: linear-gradient(45deg, #b3e0ff, #00ffff);
-            animation: rainbow 6s linear infinite;
+            
         }
 
         /* Type Normal */
-        .type-normal {
+        .type-colorless {
             background: linear-gradient(45deg, #d3d3d3, #a9a9a9);
-            animation: rainbow 6s linear infinite;
+            
         }
 
         /* Type Insecte */
         .type-bug {
             background: linear-gradient(45deg, #7fff00, #32cd32);
-            animation: rainbow 6s linear infinite;
+            
         }
 
         /* Type Fée */
         .type-fairy {
             background: linear-gradient(45deg, #ffb6c1, #ff69b4);
-            animation: rainbow 6s linear infinite;
+            
         }
 
         /* Type Psy */
         .type-psychic {
             background: linear-gradient(45deg, #ff66cc, #9933cc);
-            animation: rainbow 6s linear infinite;
+            
         }
 
         /* Type Sombre */
         .type-dark {
             background: linear-gradient(45deg, #4b0082, #800080);
-            animation: rainbow 6s linear infinite;
+            
         }
 
         /* Type Acier */
         .type-steel {
             background: linear-gradient(45deg, #b0c4de, #4682b4);
-            animation: rainbow 6s linear infinite;
+            
         }
 
         /* Type Combat */
         .type-fighting {
             background: linear-gradient(45deg, #ff4500, #8b0000);
-            animation: rainbow 6s linear infinite;
+            
         }
 
         /* Type Vol */
         .type-flying {
             background: linear-gradient(45deg, #87ceeb, #4682b4);
-            animation: rainbow 6s linear infinite;
+            
         }
 
         /* Type Fantôme */
         .type-ghost {
             background: linear-gradient(45deg, #6a5acd, #8a2be2);
-            animation: rainbow 6s linear infinite;
+            
         }
 
         /* Type Roche */
         .type-rock {
             background: linear-gradient(45deg, #b22222, #a52a2a);
-            animation: rainbow 6s linear infinite;
+            
         }
 
         /* Type Dragon */
         .type-dragon {
-            background: linear-gradient(45deg, #ff0000, #b22222);
-            animation: rainbow 6s linear infinite;
+            background: linear-gradient(45deg, #888B43, #3D3B30);
+            
         }
 
         /* Type Ténèbres */
         .type-evil {
             background: linear-gradient(45deg, #000000, #2f4f4f);
-            animation: rainbow 6s linear infinite;
+            
         }
 
         /* Animation pour les types */
@@ -318,7 +331,7 @@ import { PokemonService } from '../pokemon-service.service';
         }
 
         .card:hover .pokemon-image {
-            transform: scale(1.1) translateZ(20px);
+            transform: scale(1.0) translateZ(0px);
             filter: drop-shadow(0 0 20px rgba(255, 138, 0, 0.5));
         }
 		`
@@ -327,17 +340,49 @@ export class PokemonCardComponent {
     @Input() pokemon: any;
     isFavorite: boolean = false;
     private pokemonService = inject(PokemonService);
-  
+
     ngOnInit() {
         this.pokemonService.favorites$.subscribe(favorites => {
-          this.isFavorite = favorites.includes(this.pokemon.id);
+            this.isFavorite = favorites.includes(this.pokemon.id);
         });
     }
-  
-    toggleFavorite() {
-      this.pokemonService.switchFavorite(this.pokemon);
-      this.isFavorite = !this.isFavorite;
-      console.log('Favoris mis à jour:', this.isFavorite);
+
+    getGradient(): string {
+        if (!this.pokemon || !this.pokemon.types || this.pokemon.types.length === 0) {
+            return 'from-gray-400 via-gray-500 to-gray-600';
+        }
+
+        const type = this.pokemon.types[0].toLowerCase();
+
+        const gradients: { [key: string]: string } = {
+            fire: 'from-orange-400 via-amber-500 to-red-500',
+            water: 'from-blue-400 via-blue-500 to-cyan-500',
+            grass: 'from-green-400 via-lime-500 to-green-600',
+            electric: 'from-yellow-300 via-yellow-500 to-orange-500',
+            ice: 'from-blue-300 via-teal-400 to-cyan-500',
+            psychic: 'from-pink-400 via-purple-500 to-pink-600',
+            dark: 'from-gray-800 via-gray-900 to-black',
+            fighting: 'from-red-500 via-orange-600 to-red-700',
+            steel: 'from-gray-400 via-gray-500 to-gray-600',
+            dragon: 'from-[#888B43] via-[#B8A900] to-[#3D3B30]',
+            fairy: 'from-pink-300 via-pink-400 to-pink-500',
+            bug: 'from-green-500 via-green-600 to-lime-500',
+            rock: 'from-yellow-600 via-yellow-700 to-yellow-800',
+            ghost: 'from-purple-500 via-indigo-600 to-purple-700',
+            poison: 'from-purple-400 via-purple-500 to-indigo-600',
+            flying: 'from-sky-400 via-indigo-400 to-blue-500',
+            normal: 'from-gray-300 via-gray-400 to-gray-500',
+            ground: 'from-yellow-500 via-yellow-600 to-orange-700'
+        };
+
+        return gradients[type] || 'from-gray-400 via-gray-500 to-gray-600';
     }
-    
+
+
+    toggleFavorite() {
+        this.pokemonService.switchFavorite(this.pokemon);
+        //   this.isFavorite = !this.isFavorite;
+        console.log('Favoris mis à jour:', this.isFavorite);
+    }
+
 }

@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
 		<div class="fixed p-4 w-full z-10">
 			<div class="p-5 text-gray-500 bg-gray-900 rounded-lg shadow-lg font-medium capitalize">
 				<span class="px-3 py-1 pr-4 border-r border-gray-800">
-					<img src="../hogwarts-logo.png" alt="LogoHogwarts" class="w-8 h-8 -mt-1 inline mx-auto" />
+					<img src="../pokemontcg-logo.png" alt="LogoPokemonTCG" class="w-8 h-8 -mt-1 inline mx-auto" />
 				</span>
 
 				<a routerLink="" class="px-6 hover:text-gray-300 cursor-pointer transition-all duration-300"
@@ -21,11 +21,11 @@ import { CommonModule } from '@angular/common';
 
 				<a routerLink="" href=""
 					class="px-3 py-1 relative cursor-pointer hover:text-gray-300 text-base rounded mb-5 transition-all duration-300"
-					[class.text-gray-300]="activeRoute.startsWith('/product')">
+					[class.text-gray-300]="activeRoute.startsWith('/pokemon')">
 					<i class="w-8 fas fa-address-card p-2 bg-gray-800 rounded-full"></i>
-					<span class="mx-1">Produits</span>
+					<span class="mx-1">Cartes</span>
 					<span class="absolute left-0 ml-8 -mt-2 text-xs bg-gray-700 font-medium px-2 shadow-lg rounded-full">
-						{{ productCount }}
+						{{ pokemonCount }}
 					</span>
 				</a>
 
@@ -44,7 +44,7 @@ import { CommonModule } from '@angular/common';
 						<h3 class="font-semibold text-lg mb-2">Votre panier</h3>
 						@if (cartItems.length > 0) {
 							@for (item of cartItems; track item.pokemon.id) {
-								<div class="flex items-center justify-between mb-3">
+								<!-- <div class="flex items-center justify-between mb-3">
 									<img [src]="item.pokemon.image" alt="{{ item.pokemon.name }}" class="w-12 h-12 rounded-lg" />
 									<div class="">
 									<p class="text-sm font-medium">{{ item.pokemon.name }}</p>
@@ -62,7 +62,7 @@ import { CommonModule } from '@angular/common';
 									<button (click)="removeFromCart(+item.pokemon.id)" class="text-red-500 hover:underline text-xs">
 									<i class="fa-solid fa-delete-left"></i>
 									</button>
-								</div>
+								</div> -->
 							}
 							<div class="mt-4 text-right">
 								<a routerLink="/panier" class="bg-blue-600 px-3 py-1 text-sm rounded-lg hover:bg-blue-700 transition">
@@ -81,7 +81,7 @@ import { CommonModule } from '@angular/common';
 				</span>
 
 				<span class="px-1 hover:text-white cursor-pointer w-8 relative float-right mr-3 transition-all duration-300">
-					<i class="w-8 fas fa-bell p-2 bg-gray-800 rounded-full"></i>
+					<i class="w-8 fas fa-	bell p-2 bg-gray-800 rounded-full"></i>
 					<span
 						class="absolute right-0 top-0 -mt-2 -mr-1 text-xs bg-red-500 text-white font-medium px-2 shadow-lg rounded-full">
 						3
@@ -112,7 +112,7 @@ import { CommonModule } from '@angular/common';
 export class NavbarComponent {
 	activeRoute: string = '/';
 	private pokemonService = inject(PokemonService);
-	productCount: number = 0;
+	pokemonCount: number = this.pokemonService.getNumberOfPokemons();
 	favoritesCount: number = 0;
 	cartCount: number = 0;
 	cartItems = this.pokemonService.getCart();
@@ -121,6 +121,15 @@ export class NavbarComponent {
 	private router = inject(Router);
 	private elementRef = inject(ElementRef);
 
+	ngOnInit() {
+        this.pokemonService.favorites$.subscribe(favorites => {
+            this.favoritesCount = favorites.length;
+        });
+        this.pokemonService.cart$.subscribe(cart => {
+            this.cartCount = cart.length;
+        });
+    }
+	
 	constructor() {
 		this.router.events.subscribe((event) => {
 		  if (event instanceof NavigationEnd) {
