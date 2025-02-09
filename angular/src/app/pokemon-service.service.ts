@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { Observable, throwError, BehaviorSubject } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { Pokemon } from './pokemon';
 
 @Injectable({
@@ -58,6 +59,7 @@ export class PokemonService {
     }
     
     switchFavorite(pokemon: Pokemon) {
+        if (typeof window === 'undefined') return;
         const index = this.favorites.indexOf(pokemon.id.toString());
         if (index !== -1) {
             this.favorites.splice(index, 1);
@@ -71,6 +73,14 @@ export class PokemonService {
         this.favoritesSubject.next([...this.favorites]);
     }
 
+    private handleError(error: HttpErrorResponse) {
+        if (error.status === 404) {
+            return throwError(() => new Error("Ce Pokémon n'existe pas."));
+        } else {
+            return throwError(() => new Error("Une erreur est survenue."));
+        }
+    }
+
     private loadCartFromStorage() {
         if (typeof window !== 'undefined' && localStorage) {
             const storedCart = JSON.parse(localStorage.getItem('pokemonCart') || '[]');
@@ -79,7 +89,14 @@ export class PokemonService {
         }
     }
 
+    clearCart() {
+        localStorage.removeItem('pokemonCart');  
+        this.cart = []; 
+        this.cartSubject.next(this.cart); 
+    }    
+
     isPokemonFavorite(pokemonId: string): boolean {
+        if (typeof window === 'undefined') return false;
         const storedFavorites = JSON.parse(localStorage.getItem('pokemonFavs') || '[]');
         return storedFavorites.includes(pokemonId);
     }
@@ -107,7 +124,6 @@ export class PokemonService {
         }
         this.updateCartStorage();
     }
-    
 
     updateCartStorage() {
         if (this.isBrowser) {

@@ -15,9 +15,15 @@ exports.getPokemonById = async (req, res) => {
     try {
         const { id } = req.params;
         const pokemon = await fetchPokemonById(id);
+
+        if (!pokemon) {
+            return res.status(404).json({ error: "Pokémon non trouvé" });
+        }
+
         res.json(pokemon);
     } catch (error) {
         console.error("Erreur API:", error);
         res.status(500).json({ error: "Erreur lors de la récupération du Pokémon" });
     }
 };
+

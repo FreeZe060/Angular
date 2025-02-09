@@ -18,9 +18,22 @@ const fetchAllPokemons = async () => {
 
 
 const fetchPokemonById = async (id) => {
-    const response = await fetch(`https://api.pokemontcg.io/v2/cards/${id}`);
-    const data = await response.json();
-    return data.data;
+    try {
+        const response = await fetch(`https://api.pokemontcg.io/v2/cards/${id}`);
+
+        if (!response.ok) {
+            console.error(`Erreur API Pokémon TCG: ${response.status}`);
+            return null; // Retourne null si le Pokémon n'existe pas
+        }
+
+        const data = await response.json();
+        return data.data || null;
+    } catch (error) {
+        console.error("Erreur API:", error);
+        return null;
+    }
 };
+
+
 
 module.exports = { fetchAllPokemons, fetchPokemonById };
