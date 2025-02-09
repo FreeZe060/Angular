@@ -26,7 +26,7 @@ import { CommonModule } from '@angular/common';
                       <dl class="mt-2 space-y-2 text-sm text-gray-600">
                         <div>
                           <dt class="inline font-semibold">Prix : </dt>
-                          <dd class="inline">{{ item.pokemon.cardmarket?.prices?.averageSellPrice }}€</dd>
+                          <dd class="inline">{{ item.pokemon.cardmarket.prices.averageSellPrice }}€</dd>
                         </div>
                       </dl>
                     </div>

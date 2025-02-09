@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
-import { ProductsListComponent } from '../products-list/products-list.component';
+import { PokemonsListComponent } from '../pokemons-list/pokemons-list.component';
 
 @Component({
 	selector: 'app-main-section',
-	imports: [ProductsListComponent],
+	imports: [PokemonsListComponent],
 	template: `
     <div class="bg-black bottom-0">
 		<div class="bg-white dark:bg-gray-800">
@@ -31,7 +31,7 @@ import { ProductsListComponent } from '../products-list/products-list.component'
 	</div>
 
 
-	<app-products-list></app-products-list>
+	<app-pokemons-list></app-pokemons-list>
 
   	`,
 	styles: ``

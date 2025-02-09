@@ -9,7 +9,6 @@ export class SortByPrice implements PipeTransform {
 		return pokemons.sort((a, b) => {
 			let priceA: number, priceB: number;
 
-			// Vérification de l'existence de prix sur TCGPlayer
 			if (a.tcgplayer?.prices?.normal) {
 				priceA = a.tcgplayer.prices.normal.low;
 			} else {

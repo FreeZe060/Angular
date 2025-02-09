@@ -8,13 +8,12 @@ import { Pokemon } from '../pokemon';
 import { SortByName } from '../sort-by-name.pipe';
 import { SortByPrice } from '../sort-by-price.pipe';
 import { SortByHp } from '../sort-by-hp.pipe';
-import { SortByRarity } from '../sort-by-rarity.pipe';
 import { SortByType } from '../sort-by-type.pipe';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
-	imports: [PokemonCardComponent, FormsModule, SortByName, SortByPrice, SortByHp, SortByRarity, SortByType],
-	selector: 'app-products-list',
+	imports: [PokemonCardComponent, FormsModule, SortByName, SortByPrice, SortByHp, SortByType],
+	selector: 'app-pokemons-list',
 	template: `
 		<div class="px-5 py-8 bg-gray-100 min-h-screen">
 
@@ -49,58 +48,26 @@ import { ActivatedRoute } from '@angular/router';
                     <label class="text-gray-600 font-medium">Filtrer par Types</label>
                     <select [(ngModel)]="selectedType" (ngModelChange)="applyFilters()" class="ml-2 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-red-500">
                         <option value="">Tous types</option>
-                        <option>
-                            @for(type of types; track type) {
-                                {{ type }}
-                            }
-                        </option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-gray-600 font-medium">Filtrer par Raretés</label>
-                    <select [(ngModel)]="selectedRarity" (ngModelChange)="applyFilters()" class="ml-2 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-red-500">
-                        <option value="">Toutes les raretés</option>
-                        <option>
-                            @for(rarity of allRarities; track rarity) {
-                                {{ rarity }}
-                            }
-                        </option>
+						@for(type of types; track type) {
+							<option [value]="type">{{ type }}</option>
+						}
                     </select>
                 </div>
 
             </div>
 
 			<div class="flex justify-center items-center pt-20 gap-12 flex-wrap">
-				@for (pokemon of filteredPokemons | sortByRarity:selectedRarity | sortByType:selectedType | sortByName:sortBy | sortByHp:sortBy | sortByPrice:sortBy; track trackByFn) {
+				@for (pokemon of filteredPokemons | sortByType:selectedType | sortByName:sortBy | sortByHp:sortBy | sortByPrice:sortBy; track trackByFn) {
 					<app-pokemon-card [pokemon]="pokemon"></app-pokemon-card>
 				}
 			</div>
 
     	</div>
-       	<div class="container mx-auto p-4">
-            <div class="text-center mb-6">
-                
-
-                <div class="mt-4">
-                
-                </div>
-
-                <div class="mt-4 flex flex-wrap justify-center gap-4">
-                     
-
-                    
-                </div>
-            </div>
-
-            <div class="flex flex-wrap items-center gap-12">
-                
-            </div>
-        </div>
     `,
 	styles: ``,
 	providers: []
 })
-export class ProductsListComponent implements OnInit {
+export class PokemonsListComponent implements OnInit {
 	@Input() pokemon: any;
 	pokemons: Pokemon[] = [];
 	filteredPokemons: Pokemon[] = [];
@@ -111,6 +78,10 @@ export class ProductsListComponent implements OnInit {
 	selectedRarity = '';
 	sortBy = 'name_asc';
 	allRarities: string[] = [];
+	showFavorites = false;
+
+	private searchTerms = new Subject<string>();
+	private activatedRoute = inject(ActivatedRoute);
 
 	constructor(private pokemonService: PokemonService) { }
 
@@ -166,6 +137,12 @@ export class ProductsListComponent implements OnInit {
 				pokemon.name.toLowerCase().includes(this.searchName.toLowerCase())
 			);
 		}
+
+		if (this.selectedType) {
+			this.filteredPokemons = this.filteredPokemons.filter(pokemon =>
+				pokemon.types && pokemon.types.includes(this.selectedType)
+			);
+		}
 	}
 
 	toggleFavorite(pokemon: Pokemon) {
@@ -175,88 +152,4 @@ export class ProductsListComponent implements OnInit {
 	trackByFn(index: number, item: Pokemon) {
 		return item.id;
 	}
-
-  showFavorites = false;
-  
-  private searchTerms = new Subject<string>();
-  private activatedRoute = inject(ActivatedRoute);
-
-  
-
-  
 }
-
-
-// export class ProductsListComponent implements OnInit {
-//   pokemons: Pokemon[] = [];
-//   filteredPokemons: Pokemon[] = [];
-//   searchName = '';
-//   selectedType = '';
-//   selectedRarity = '';
-//   sortBy = 'name_asc';
-//   showFavorites = false;
-  
-//   private searchTerms = new Subject<string>();
-//   private activatedRoute = inject(ActivatedRoute);
-//   private pokemonService = inject(PokemonService);
-//   types: any;
-// allRarities: any;
-
-//   ngOnInit() {
-//       this.pokemonService.getPokemons().subscribe((data) => {
-//           if (data && Array.isArray(data)) {
-//               this.pokemons = data;
-//               this.applyFilters();
-//           } else {
-//               console.error('Données invalides reçues', data);
-//           }
-//       });
-
-//       this.pokemonService.getTypes().subscribe((types) => {
-//           this.types = types;
-//       });
-
-//       this.activatedRoute.url.subscribe((urlSegments) => {
-//           this.showFavorites = urlSegments.some(segment => segment.path === 'favoris');
-//           this.applyFilters();
-//       });
-
-//       this.searchTerms.pipe(
-//         debounceTime(300),
-//         distinctUntilChanged()
-//       ).subscribe(() => {
-//           this.applyFilters();
-//       });
-//   }
-
-//   onSearchInputChange() {
-//     this.searchTerms.next(this.searchName);
-//   }
-
-//   applyFilters() {
-//       if (!this.pokemons.length) return;
-
-//       this.filteredPokemons = [...this.pokemons];
-
-//       if (this.showFavorites) {
-//           this.filteredPokemons = this.filteredPokemons.filter(pokemon =>
-//               this.pokemonService.isPokemonFavorite(pokemon.id)
-//           );
-//       }
-
-//       if (this.searchName) {
-//           this.filteredPokemons = this.filteredPokemons.filter(pokemon =>
-//               pokemon.name.toLowerCase().includes(this.searchName.toLowerCase())
-//           );
-//       }
-//   }
-
-//   toggleFavorite(pokemon: Pokemon) {
-//       this.pokemonService.switchFavorite(pokemon);
-//   }
-
-//   trackByFn(index: number, item: Pokemon) {
-//       return item.id;
-//   }
-// }
-

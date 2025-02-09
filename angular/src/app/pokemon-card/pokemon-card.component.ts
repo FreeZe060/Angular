@@ -87,11 +87,7 @@ import { RouterLink } from '@angular/router';
                             }
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="bg-white/90 backdrop-blur rounded-lg p-3">
-                <div class="flex justify-between items-center">
+                    <div class="flex justify-between items-center">
                     @if (quantityInCart > 0) {
                         <div class="flex items-center gap-2">
                             <button (click)="updateQuantity(-1)" class="bg-gray-300 text-black px-2 py-1 rounded">-</button>
@@ -99,15 +95,15 @@ import { RouterLink } from '@angular/router';
                             <button (click)="updateQuantity(1)" class="bg-blue-500 text-white px-2 py-1 rounded">+</button>
                         </div>
                     } @else {
-                        <button (click)="addToCart()" class="bg-blue-500 text-white px-3 py-1 rounded">Ajouter au panier</button>
+                        <button (click)="addToCart()" class="text-gray-500"><i class="fa-solid fa-cart-plus"></i></button>
                     }
+                </div>
                 </div>
             </div>
 
 			<div class="mt-3 text-[10px] text-white/80 text-center italic">
 				{{pokemon.flavorText}}
                 {{pokemon.prices | currency:'EUR'}}
-			</div>
 			</div>
 		</div>
 	</div>

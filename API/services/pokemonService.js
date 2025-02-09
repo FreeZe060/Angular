@@ -1,18 +1,24 @@
-const POKEMON_API_URL = "https://api.pokemontcg.io/v2/cards?q=nationalPokedexNumbers:[1%20TO%20151]&pageSize=4";
+const POKEMON_API_URL = "https://api.pokemontcg.io/v2/cards?q=nationalPokedexNumbers:[1%20TO%20151]&pageSize=151";
 
-const fetchAllPokemons = async () => {
+const fetchAllPokemons = async (type = '') => {
     try {
-        const response = await fetch(POKEMON_API_URL);
+        let url = POKEMON_API_URL;
+
+        if (type) {
+            url += `&q=types:${type}`;
+        }
+
+        const response = await fetch(url);
         if (!response.ok) throw new Error("Erreur lors de la récupération des Pokémon");
-        
+
         const data = await response.json();
         return data.data.map(pokemon => ({
             ...pokemon,
-            prices: pokemon.cardmarket?.prices?.averageSellPrice ?? 0 
+            prices: pokemon.cardmarket?.prices?.averageSellPrice ?? 0
         }));
     } catch (error) {
         console.error("Erreur API:", error);
-        return []; 
+        return [];
     }
 };
 

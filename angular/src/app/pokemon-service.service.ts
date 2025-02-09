@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap } from 'rxjs';
+import { Observable, BehaviorSubject, tap, map } from 'rxjs';
 import { Pokemon } from './pokemon';
 
 @Injectable({
@@ -50,8 +50,11 @@ export class PokemonService {
     }
 
     getTypes(): Observable<string[]> {
-        return this.http.get<string[]>(`${this.apiUrl}/types`);
+        return this.http.get<any>('https://api.pokemontcg.io/v2/types').pipe(
+            map(response => response.data)
+        );
     }
+
 
     getNumberOfPokemons(): number {
         return this.pokemons.length;
