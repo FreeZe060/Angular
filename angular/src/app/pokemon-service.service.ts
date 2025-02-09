@@ -18,8 +18,8 @@ export class PokemonService {
     private pokemonsCountSubject = new BehaviorSubject<number>(0);
     pokemonsCount$ = this.pokemonsCountSubject.asObservable();
 
-    private favorites: number[] = [];
-    private favoritesSubject = new BehaviorSubject<number[]>([]);
+    private favorites: string[] = [];  
+    private favoritesSubject = new BehaviorSubject<string[]>([]);
     favorites$ = this.favoritesSubject.asObservable();
 
     private favoritesCountSubject = new BehaviorSubject<number>(0);
@@ -63,30 +63,25 @@ export class PokemonService {
 
     private loadFavoritesFromStorage() {
         if (typeof window !== 'undefined' && localStorage) {
-            this.favorites = JSON.parse(localStorage.getItem('pokemonFavs') || '[]');
-            this.favoritesSubject.next(this.favorites);
+            this.favorites = JSON.parse(localStorage.getItem('pokemonFavs') || '[]'); 
+            this.favoritesSubject.next([...this.favorites]); 
             this.favoritesCountSubject.next(this.favorites.length);
         }
     }
+    
+    switchFavorite(pokemon: Pokemon) {
+        const index = this.favorites.indexOf(pokemon.id.toString());
+        if (index !== -1) {
+            this.favorites.splice(index, 1);
+        } else {
+            this.favorites.push(pokemon.id.toString());
+        }
 
-    switchFavorite(pokemon: Pokemon) {}
-
-    // switchFavorite(pokemon: Pokemon) {
-    //     if (pokemon.isFavorite) {
-    //         this.favorites = this.favorites.filter(id => id !== pokemon.id);
-    //     } else {
-    //         this.favorites.push(pokemon.id);
-    //     }
-        
-    //     pokemon.isFavorite = !pokemon.isFavorite;
-    //     this.pokemonsSubject.next(this.pokemons);
-    //     this.favoritesSubject.next(this.favorites);
-    //     this.favoritesCountSubject.next(this.favorites.length);
-
-    //     if (typeof window !== 'undefined' && localStorage) {
-    //         localStorage.setItem('pokemonFavs', JSON.stringify(this.favorites));
-    //     }
-    // }
+        this.favoritesSubject.next([...this.favorites]); 
+        this.favoritesCountSubject.next(this.favorites.length);
+        localStorage.setItem('pokemonFavs', JSON.stringify(this.favorites));
+        this.favoritesSubject.next([...this.favorites]);
+    }
 
     private loadCartFromStorage() {
         if (typeof window !== 'undefined' && localStorage) {
@@ -94,6 +89,11 @@ export class PokemonService {
             this.cart = storedCart;
             this.cartSubject.next(this.cart);
         }
+    }
+
+    isPokemonFavorite(pokemonId: string): boolean {
+        const storedFavorites = JSON.parse(localStorage.getItem('pokemonFavs') || '[]');
+        return storedFavorites.includes(pokemonId);
     }
 
     addToCart(pokemon: Pokemon, quantity: number = 1) {
@@ -107,16 +107,29 @@ export class PokemonService {
         this.updateCartStorage();
     }
 
-    removeFromCart(pokemonId: number) {
-        this.cart = this.cart.filter(item => item.pokemon.id !== pokemonId.toString());
+    removeFromCart(pokemonId: string) {
+        this.cart = this.cart.filter(item => item.pokemon.id !== pokemonId); // Comparaison correcte
         this.updateCartStorage();
     }
+    
+    updateCartQuantity(pokemonId: string, quantity: number) {
+        const existingItem = this.cart.find(item => item.pokemon.id === pokemonId);
+        if (existingItem) {
+            existingItem.quantity = quantity;
+        }
+        this.updateCartStorage();
+    }
+    
 
     updateCartStorage() {
         if (this.isBrowser) {
             localStorage.setItem('pokemonCart', JSON.stringify(this.cart));
         }
         this.cartSubject.next(this.cart);
+    }
+
+    getFavorites(pokemons: Pokemon[]): Pokemon[] {
+        return pokemons.filter(pokemon => this.favorites.includes(pokemon.id.toString()));
     }
 
     getCart() {
