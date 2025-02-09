@@ -73,6 +73,7 @@ export class PokemonService {
     }
     
     switchFavorite(pokemon: Pokemon) {
+        if (typeof window === 'undefined') return;
         const index = this.favorites.indexOf(pokemon.id.toString());
         if (index !== -1) {
             this.favorites.splice(index, 1);
@@ -95,6 +96,7 @@ export class PokemonService {
     }
 
     isPokemonFavorite(pokemonId: string): boolean {
+        if (typeof window === 'undefined') return false;
         const storedFavorites = JSON.parse(localStorage.getItem('pokemonFavs') || '[]');
         return storedFavorites.includes(pokemonId);
     }
