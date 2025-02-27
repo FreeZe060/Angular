@@ -14,6 +14,21 @@ const browserDistFolder = resolve(serverDistFolder, '../browser');
 const app = express();
 const angularApp = new AngularNodeAppEngine();
 
+// import { provideServerRenderingConfig } from '@angular/platform-server';
+
+// provideServerRenderingConfig({
+//   routes: {
+//     'pokemon/:id': {
+//       getPrerenderParams: async () => {
+//         return fetch('https://api.example.com/pokemons')
+//           .then(res => res.json())
+//           .then(data => data.map(pokemon => ({ id: pokemon.id })));
+//       }
+//     }
+//   }
+// });
+
+
 /**
  * Example Express Rest API endpoints can be defined here.
  * Uncomment and define endpoints as necessary.
@@ -59,6 +74,7 @@ if (isMainModule(import.meta.url)) {
     console.log(`Node Express server listening on http://localhost:${port}`);
   });
 }
+
 
 /**
  * The request handler used by the Angular CLI (dev-server and during build).
