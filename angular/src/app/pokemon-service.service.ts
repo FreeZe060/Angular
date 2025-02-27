@@ -8,7 +8,7 @@ import { Pokemon } from './pokemon';
   providedIn: 'root',
 })
 export class PokemonService {
-    private apiUrl = 'http://localhost:8080/api/pokemons';  
+    private apiUrl = 'https://angular-9c8l.onrender.com/api/pokemons';  
 
     private isBrowser: boolean = typeof window !== 'undefined';
 
