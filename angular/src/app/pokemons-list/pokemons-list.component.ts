@@ -1,5 +1,6 @@
 import { Component, OnInit, Input, inject } from '@angular/core';
-import { Subject } from 'rxjs';
+import { CommonModule } from '@angular/common';
+import { Observable, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
 import { PokemonService } from '../pokemon-service.service';
@@ -10,12 +11,14 @@ import { SortByPrice } from '../sort-by-price.pipe';
 import { SortByHp } from '../sort-by-hp.pipe';
 import { SortByType } from '../sort-by-type.pipe';
 import { ActivatedRoute } from '@angular/router';
+import { LoadingSpinnerComponent } from '../loading-spinner.component';
 
 @Component({
-	imports: [PokemonCardComponent, FormsModule, SortByName, SortByPrice, SortByHp, SortByType],
+	imports: [PokemonCardComponent, FormsModule, SortByName, SortByPrice, SortByHp, SortByType, LoadingSpinnerComponent, CommonModule],
 	selector: 'app-pokemons-list',
 	template: `
-		<div class="px-5 py-8 bg-gray-100 min-h-screen">
+		<app-loading-spinner [isLoading]="(isLoading$ | async) ?? false"></app-loading-spinner>
+		<div class="px-5 py-8 bg-gray-100 min-h-screen" *ngIf="!(isLoading$ | async)">
 
             <div class="px-5 flex gap-16 items-center justify-center bg-white shadow-xl rounded-lg p-4">
                 <div class="flex items-center bg-gray-100 p-2 rounded-lg">
@@ -79,11 +82,14 @@ export class PokemonsListComponent implements OnInit {
 	sortBy = 'name_asc';
 	allRarities: string[] = [];
 	showFavorites = false;
+	isLoading$: Observable<boolean>;
 
 	private searchTerms = new Subject<string>();
 	private activatedRoute = inject(ActivatedRoute);
 
-	constructor(private pokemonService: PokemonService) { }
+	constructor(private pokemonService: PokemonService) { 
+		this.isLoading$ = this.pokemonService.isLoading$;
+	  }
 
 	ngOnInit() {
 		this.pokemonService.getPokemons().subscribe((data) => {
@@ -116,6 +122,8 @@ export class PokemonsListComponent implements OnInit {
 			this.applyFilters();
 		});
 	}
+
+	
 
 	onSearchInputChange() {
 		this.searchTerms.next(this.searchName);

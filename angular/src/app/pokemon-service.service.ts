@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
-import { Observable, throwError, BehaviorSubject, tap, map } from 'rxjs';
+import { Observable, throwError, BehaviorSubject, tap, finalize, map } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Pokemon } from './pokemon';
 
@@ -11,6 +11,10 @@ export class PokemonService {
     private apiUrl = 'https://angular-9c8l.onrender.com/api/pokemons';  
 
     private isBrowser: boolean = typeof window !== 'undefined';
+
+    // Pour gérer l'état de chargement
+    private isLoadingSubject = new BehaviorSubject<boolean>(false);
+    isLoading$ = this.isLoadingSubject.asObservable();
 
     private pokemons: Pokemon[] = [];
     private pokemonsSubject = new BehaviorSubject<Pokemon[]>([]);
@@ -41,12 +45,15 @@ export class PokemonService {
         if (type) params = params.set('type', type);
         if (sortBy) params = params.set('sortBy', sortBy);
 
+        this.isLoadingSubject.next(true);
+
         return this.http.get<Pokemon[]>(`${this.apiUrl}`, { params }).pipe(
-            tap(pokemons => {
-                this.pokemons = pokemons;
-                this.pokemonsSubject.next(this.pokemons);
-                this.pokemonsCountSubject.next(pokemons.length);
-            })
+        tap(pokemons => {
+            this.pokemons = pokemons;
+            this.pokemonsSubject.next(this.pokemons);
+            this.pokemonsCountSubject.next(pokemons.length);
+        }),
+            finalize(() => this.isLoadingSubject.next(false))
         );
     }
 
