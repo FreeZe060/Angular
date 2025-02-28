@@ -1,6 +1,8 @@
 import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 @Component({
+  imports: [CommonModule],
   selector: 'app-loading-spinner',
   template: `
     <div class="loading-overlay" *ngIf="isLoading">
