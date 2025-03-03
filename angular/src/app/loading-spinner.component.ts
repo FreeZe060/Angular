@@ -40,5 +40,7 @@ import { CommonModule } from '@angular/common';
 })
 export class LoadingSpinnerComponent {
   @Input() isLoading = false;
-  @Input() message: string = 'Chargement des données...';
+  @Input() message: string = `Chargement des données...
+  Cela peut prendre quelques secondes`;
 }
+
